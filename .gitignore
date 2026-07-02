@@ -1,0 +1,6 @@
+backend/pb_data
+backend/bin
+.env
+
+*.swp
+*.swo
