@@ -1,11 +1,13 @@
 package collections
 
 import (
+	"log"
+
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/types"
 )
 
-func CreateCourseCollection() *core.Collection {
+func CreateCourseCollection(app core.App) *core.Collection {
 
 	collection := core.NewBaseCollection("courses")
 
@@ -14,6 +16,11 @@ func CreateCourseCollection() *core.Collection {
 	collection.CreateRule = types.Pointer("@request.auth.id != ''")     //create course - authenticated user only
 	collection.UpdateRule = types.Pointer("creator = @request.auth.id") //update course - creator of the course
 	collection.DeleteRule = types.Pointer("creator = @request.auth.id") //delete course - creator of the course
+
+	users, err := app.FindCollectionByNameOrId("users")
+	if err != nil {
+		log.Fatal("failed to find users collection: %w", err)
+	}
 
 	collection.Fields.Add(
 		&core.TextField{
@@ -30,7 +37,7 @@ func CreateCourseCollection() *core.Collection {
 		&core.RelationField{
 			Name:         "creator",
 			Required:     true,
-			CollectionId: "users",
+			CollectionId: users.Id,
 			MaxSelect:    1,
 		},
 	)

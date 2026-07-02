@@ -5,7 +5,7 @@ import (
 	"github.com/pocketbase/pocketbase/tools/types"
 )
 
-func CreateUserCollection() *core.Collection {
+func CreateUserCollection(app core.App) *core.Collection {
 	collection := core.NewAuthCollection("users")
 
 	collection.ListRule = types.Pointer("id = @request.auth.id")

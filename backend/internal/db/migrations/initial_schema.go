@@ -2,6 +2,7 @@ package migrations
 
 import (
 	"backend/internal/db/collections"
+	"fmt"
 
 	"github.com/pocketbase/pocketbase/core"
 	m "github.com/pocketbase/pocketbase/migrations"
@@ -11,17 +12,20 @@ func init() {
 	m.Register(
 		func(app core.App) error {
 
-			creators := []func() *core.Collection{
-				collections.CreateUserCollection,
+			creators := []func(app core.App) *core.Collection{
+				//collections.CreateUserCollection,
 				collections.CreateCourseCollection,
+				collections.CreateSubscriptionCollection,
 				collections.CreateChapterCollection,
 				collections.CreateVideoCollection,
 				collections.CreateNoteCollection,
 			}
 
 			for _, create := range creators {
-				if err := app.Save(create()); err != nil {
-					return err
+				collection := create(app)
+
+				if err := app.Save(collection); err != nil {
+					return fmt.Errorf("failed to create collection %q: %w", collection.Name, err)
 				}
 			}
 
@@ -30,10 +34,10 @@ func init() {
 
 		func(app core.App) error {
 			names := []string{
-				"subscriptions",
 				"notes",
 				"videos",
 				"chapters",
+				"subscriptions",
 				"courses",
 				"users",
 			}
@@ -41,11 +45,11 @@ func init() {
 			for _, name := range names {
 				collection, err := app.FindCollectionByNameOrId(name)
 				if err != nil {
-					return err
+					return fmt.Errorf("failed to find collection %q: %w", name, err)
 				}
 
 				if err := app.Delete(collection); err != nil {
-					return err
+					return fmt.Errorf("failed to delete collection %q during rollback: %w", name, err)
 				}
 			}
 			return nil

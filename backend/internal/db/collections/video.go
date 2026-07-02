@@ -1,11 +1,13 @@
 package collections
 
 import (
+	"log"
+
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/types"
 )
 
-func CreateVideoCollection() *core.Collection {
+func CreateVideoCollection(app core.App) *core.Collection {
 	collection := core.NewBaseCollection("videos")
 
 	collection.ListRule = types.Pointer("@request.auth.id != ''")                      //authorised user - access all video
@@ -13,6 +15,11 @@ func CreateVideoCollection() *core.Collection {
 	collection.CreateRule = types.Pointer("chapter.course.creator = @request.auth.id") //course creator - creates video
 	collection.UpdateRule = types.Pointer("chapter.course.creator = @request.auth.id") //course creator = updates video
 	collection.DeleteRule = types.Pointer("chapter.course.creator = @request.auth.id") //course creator - deletes video
+
+	chapters, err := app.FindCollectionByNameOrId("chapters")
+	if err != nil {
+		log.Fatal("failed to find collection chapters", err)
+	}
 
 	collection.Fields.Add(
 		&core.TextField{
@@ -39,7 +46,7 @@ func CreateVideoCollection() *core.Collection {
 		&core.RelationField{
 			Name:         "chapter",
 			Required:     true,
-			CollectionId: "chapters",
+			CollectionId: chapters.Id,
 			MaxSelect:    1,
 		},
 	)
