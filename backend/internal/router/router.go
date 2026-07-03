@@ -7,7 +7,6 @@ import (
 	pocketRouter "github.com/pocketbase/pocketbase/tools/router"
 )
 
-
-func Register(r *pocketRouter.Router[*core.RequestEvent], app core.App){
-	r.GET("/health", health.HealthHandler)
+func Register(r *pocketRouter.Router[*core.RequestEvent], app core.App) {
+	health.RegisterRoutes(r)
 }
