@@ -1,25 +1,10 @@
 package user
 
-type CreateProfileRequest struct{
-
+type CreateUserRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }
 
-type ProfileCreationResponse struct{
-
-}
-
-type CreateCourseRequest struct{
-
-}
-
-type CourseCreationResponse struct{
-
-}
-
-type SubscribeRequest struct{
-
-}
-
-type SubscribeResponse struct{
-
+type CreateUserResponse struct {
+	UserId string `json:"userId"`
 }

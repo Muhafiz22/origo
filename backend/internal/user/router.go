@@ -6,5 +6,5 @@ import (
 )
 
 func RegisterRoutes(r *pocketRouter.Router[*core.RequestEvent]) {
-	r.POST("/users{id}", createUserHandler)
+	r.POST("/users", createUserHandler)
 }
