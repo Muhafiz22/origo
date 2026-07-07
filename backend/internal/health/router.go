@@ -7,5 +7,6 @@ import (
 )
 
 func RegisterRoutes(r *pocketRouter.Router[*core.RequestEvent]) {
+
 	r.GET("/health", HealthHandler)
 }

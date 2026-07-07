@@ -16,13 +16,9 @@ func CreateUserCollection(app core.App) *core.Collection {
 
 	collection.Fields.Add(
 		&core.TextField{
-			Name:     "name",
+			Name:     "username",
 			Required: true,
 			Max:      100,
-		},
-		&core.TextField{
-			Name: "phone",
-			Max:  20,
 		},
 	)
 

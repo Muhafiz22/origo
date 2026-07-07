@@ -11,6 +11,7 @@ import (
 func init() {
 	m.Register(
 		func(app core.App) error {
+			fmt.Println("Starting db migrations")
 
 			creators := []func(app core.App) *core.Collection{
 				//collections.CreateUserCollection,

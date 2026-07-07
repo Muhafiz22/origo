@@ -1,4 +1,4 @@
-.PHONY: build run clean
+.PHONY: build run clean clean-db
 
 BINARY := backend/bin/origo_server
 
@@ -10,3 +10,6 @@ run: build
 
 clean:
 	rm -rf $(BINARY)
+
+clean-db:
+	cd backend/bin && rm -rf pb_data

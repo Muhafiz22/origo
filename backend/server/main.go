@@ -3,6 +3,8 @@ package main
 import (
 	_ "backend/internal/db/migrations"
 	"backend/internal/router"
+	"backend/internal/user"
+	"fmt"
 	"os"
 
 	"github.com/pocketbase/pocketbase"
@@ -12,15 +14,23 @@ import (
 )
 
 func main() {
-
+	fmt.Println("main started")
 	app := pocketbase.New()
+	fmt.Println("app created")
 
 	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
 		Automigrate: osutils.IsProbablyGoRun(),
 	})
 
+	userService := user.NewService(app)
+	userHandler := user.NewHandler(userService)
+
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
-		router.Register(se.Router, app)
+		fmt.Println("on serve hook executed")
+		router.Register(
+			se.Router,
+			userHandler,
+		)
 
 		app.Logger().Info(
 			"server started",
@@ -30,6 +40,7 @@ func main() {
 		return se.Next()
 	})
 
+	fmt.Println("calling app.start()")
 	if err := app.Start(); err != nil {
 		app.Logger().Error(
 			"server failed to start:",
