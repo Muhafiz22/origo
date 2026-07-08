@@ -1,4 +1,4 @@
-package user
+package auth
 
 // POST /auth/register
 type RegisterRequest struct { //client -> server
