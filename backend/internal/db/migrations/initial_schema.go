@@ -4,6 +4,7 @@ import (
 	"backend/internal/db/collections"
 	"fmt"
 
+	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	m "github.com/pocketbase/pocketbase/migrations"
 )
@@ -12,6 +13,23 @@ func init() {
 	m.Register(
 		func(app core.App) error {
 			fmt.Println("Starting db migrations")
+
+			users, err := app.FindCollectionByNameOrId("users")
+			if err != nil {
+				return apis.NewInternalServerError(
+					"failed to get users collection", err)
+			}
+
+			users.Fields.Add(
+				&core.TextField{
+					Name: "bio",
+					Max:  100,
+				},
+			)
+
+			if err := app.Save(users); err != nil {
+				return apis.NewInternalServerError("failed to save 'bio' field in users collection", err)
+			}
 
 			creators := []func(app core.App) *core.Collection{
 				//collections.CreateUserCollection,

@@ -3,13 +3,20 @@ package router
 import (
 	"backend/internal/auth"
 	"backend/internal/health"
+	"backend/internal/user"
 
 	"github.com/pocketbase/pocketbase/core"
 	pocketRouter "github.com/pocketbase/pocketbase/tools/router"
 )
 
-func Register(r *pocketRouter.Router[*core.RequestEvent], authHandler *auth.Handler) {
+type Dependencies struct {
+	Auth *auth.Handler
+	User *user.Handler
+}
+
+func Register(r *pocketRouter.Router[*core.RequestEvent], d Dependencies) {
 	health.RegisterRoutes(r)
 
-	auth.RegisterRoutes(r, authHandler)
+	auth.RegisterRoutes(r, d.Auth)
+	user.RegisterRoutes(r, d.User)
 }

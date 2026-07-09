@@ -4,6 +4,7 @@ import (
 	"backend/internal/auth"
 	_ "backend/internal/db/migrations"
 	"backend/internal/router"
+	"backend/internal/user"
 	"fmt"
 	"os"
 
@@ -13,10 +14,10 @@ import (
 	"github.com/pocketbase/pocketbase/tools/osutils"
 )
 
-/*
-TODO:
-	1. Custom Password validation logic for users.
-	2. setup SMTP service.
+/* TODO:
+1. Custom Password validation logic for users.
+2. setup SMTP service.
+3. Add Bio field to users collection
 */
 
 func main() {
@@ -28,14 +29,21 @@ func main() {
 		Automigrate: osutils.IsProbablyGoRun(),
 	})
 
-	userService := auth.NewService(app)
-	userHandler := auth.NewHandler(userService)
+	authService := auth.NewService(app)
+	authHandler := auth.NewHandler(authService)
+
+	userService := user.NewService(app)
+	userHandler := user.NewHandler(userService)
 
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		fmt.Println("on serve hook executed")
+
 		router.Register(
 			se.Router,
-			userHandler,
+			router.Dependencies{
+				Auth: authHandler,
+				User: userHandler,
+			},
 		)
 
 		app.Logger().Info(
