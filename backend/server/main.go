@@ -15,9 +15,8 @@ import (
 )
 
 /* TODO:
-1. Custom Password validation logic for users.
+1. Password validation logic - uppercase, lowercase, numbers, special char check.
 2. setup SMTP service.
-3. Add Bio field to users collection
 */
 
 func main() {

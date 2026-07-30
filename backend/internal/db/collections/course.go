@@ -26,7 +26,7 @@ func CreateCourseCollection(app core.App) *core.Collection {
 		&core.TextField{
 			Name:     "name",
 			Required: true,
-			Max:      30,
+			Max:      100,
 		},
 
 		&core.TextField{
@@ -35,7 +35,7 @@ func CreateCourseCollection(app core.App) *core.Collection {
 		},
 
 		&core.RelationField{
-			Name:         "creator",
+			Name:         "creatorId",
 			Required:     true,
 			CollectionId: users.Id,
 			MaxSelect:    1,
