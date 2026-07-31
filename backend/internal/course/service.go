@@ -84,3 +84,53 @@ func (s *Service) getCourse(id string) (CourseResponse, error) {
 
 	return response, nil
 }
+
+func (s *Service) getCourseRecord(courseId string) (*core.Record, error) {
+	courseRecord, err := s.app.FindRecordById("courses", courseId)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apis.NewNotFoundError("course not found", nil)
+		}
+
+		s.app.Logger().Error(
+			"failed to fetch course record",
+			"error", err,
+		)
+
+		return nil, apis.NewInternalServerError("something went wrong", nil)
+	}
+
+	return courseRecord, nil
+}
+
+func (s *Service) updateCourse(record *core.Record, req UpdateCourseRequest) error {
+	if req.Name != nil {
+		record.Set("name", *req.Name)
+	}
+	if req.Description != nil {
+		record.Set("description", *req.Description)
+	}
+
+	if err := s.app.Save(record); err != nil {
+		s.app.Logger().Error(
+			"failed to save course record while updating",
+			"error", err,
+		)
+
+		return apis.NewInternalServerError("something went wrong, try again.", nil)
+	}
+
+	return nil
+}
+
+func (s *Service) deleteCourse(courseRecord *core.Record) error {
+	if err := s.app.Delete(courseRecord); err != nil {
+		s.app.Logger().Error("failed to delete course record",
+			"error", err,
+		)
+
+		return apis.NewInternalServerError("something went wrong", nil)
+	}
+	return nil
+}

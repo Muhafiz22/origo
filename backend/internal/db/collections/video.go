@@ -10,11 +10,11 @@ import (
 func CreateVideoCollection(app core.App) *core.Collection {
 	collection := core.NewBaseCollection("videos")
 
-	collection.ListRule = types.Pointer("@request.auth.id != ''")                      //authorised user - access all video
-	collection.ViewRule = types.Pointer("@request.auth.id != ''")                      //authorised user - access a video
-	collection.CreateRule = types.Pointer("chapter.course.creator = @request.auth.id") //course creator - creates video
-	collection.UpdateRule = types.Pointer("chapter.course.creator = @request.auth.id") //course creator = updates video
-	collection.DeleteRule = types.Pointer("chapter.course.creator = @request.auth.id") //course creator - deletes video
+	collection.ListRule = types.Pointer("@request.auth.id != ''")                        //authorised user - access all video
+	collection.ViewRule = types.Pointer("@request.auth.id != ''")                        //authorised user - access a video
+	collection.CreateRule = types.Pointer("chapter.course.creatorId = @request.auth.id") //course creator - creates video
+	collection.UpdateRule = types.Pointer("chapter.course.creatorId = @request.auth.id") //course creator = updates video
+	collection.DeleteRule = types.Pointer("chapter.course.creatorId = @request.auth.id") //course creator - deletes video
 
 	chapters, err := app.FindCollectionByNameOrId("chapters")
 	if err != nil {

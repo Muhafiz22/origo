@@ -11,11 +11,11 @@ func CreateChapterCollection(app core.App) *core.Collection {
 
 	collection := core.NewBaseCollection("chapters")
 
-	collection.ListRule = types.Pointer("@request.auth.id != ''")              //authenticated user - list all chapters of all courses
-	collection.ViewRule = types.Pointer("@request.auth.id != ''")              //authenticated user - view a chapter
-	collection.CreateRule = types.Pointer("course.creator = @request.auth.id") //course creator - creates the chapter
-	collection.UpdateRule = types.Pointer("course.creator = @request.auth.id") //course creator - updates the chapter
-	collection.DeleteRule = types.Pointer("course.creator = @request.auth.id") //course creator - delete a chapter
+	collection.ListRule = types.Pointer("@request.auth.id != ''")                //authenticated user - list all chapters of all courses
+	collection.ViewRule = types.Pointer("@request.auth.id != ''")                //authenticated user - view a chapter
+	collection.CreateRule = types.Pointer("course.creatorId = @request.auth.id") //course creator - creates the chapter
+	collection.UpdateRule = types.Pointer("course.creatorId = @request.auth.id") //course creator - updates the chapter
+	collection.DeleteRule = types.Pointer("course.creatorId = @request.auth.id") //course creator - delete a chapter
 
 	courses, err := app.FindCollectionByNameOrId("courses")
 	if err != nil {

@@ -60,3 +60,58 @@ func (h *Handler) getCourseHandler(e *core.RequestEvent) error {
 
 	return e.JSON(http.StatusOK, response)
 }
+
+func (h *Handler) updateCourseHandler(e *core.RequestEvent) error {
+	var req UpdateCourseRequest
+	if err := e.BindBody(&req); err != nil {
+		return err
+	}
+
+	userRecord := e.Auth
+	courseId := e.Request.PathValue("id")
+
+	courseRecord, err := h.service.getCourseRecord(courseId)
+
+	if err != nil {
+		return err
+	}
+
+	creatorId := courseRecord.GetString("creatorId")
+
+	if userRecord.Id != creatorId {
+		return apis.NewForbiddenError("Unauthorised user", nil)
+	}
+
+	if err := h.service.updateCourse(courseRecord, req); err != nil {
+		return err
+	}
+
+	return e.JSON(http.StatusOK, map[string]string{
+		"message": "course details updated successfully",
+	})
+}
+
+func (h *Handler) deleteCourseHandler(e *core.RequestEvent) error {
+	userRecord := e.Auth
+	courseId := e.Request.PathValue("id")
+
+	courseRecord, err := h.service.getCourseRecord(courseId)
+
+	if err != nil {
+		return err
+	}
+
+	creatorId := courseRecord.GetString("creatorId")
+
+	if userRecord.Id != creatorId {
+		return apis.NewForbiddenError("unauthorised operation", nil)
+	}
+
+	if err := h.service.deleteCourse(courseRecord); err != nil {
+		return err
+	}
+
+	return e.JSON(http.StatusOK, map[string]string{
+		"message": "course deleted successfully",
+	})
+}
