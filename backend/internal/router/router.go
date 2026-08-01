@@ -2,6 +2,8 @@ package router
 
 import (
 	"backend/internal/auth"
+	"backend/internal/chapter"
+	"backend/internal/course"
 	"backend/internal/health"
 	"backend/internal/user"
 
@@ -10,8 +12,10 @@ import (
 )
 
 type Dependencies struct {
-	Auth *auth.Handler
-	User *user.Handler
+	Auth    *auth.Handler
+	User    *user.Handler
+	Course  *course.Handler
+	Chapter *chapter.Handler
 }
 
 func Register(r *pocketRouter.Router[*core.RequestEvent], d Dependencies) {
@@ -19,4 +23,5 @@ func Register(r *pocketRouter.Router[*core.RequestEvent], d Dependencies) {
 
 	auth.RegisterRoutes(r, d.Auth)
 	user.RegisterRoutes(r, d.User)
+	course.RegisterRoutes(r, d.Course)
 }

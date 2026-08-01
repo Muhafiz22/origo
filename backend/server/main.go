@@ -2,6 +2,8 @@ package main
 
 import (
 	"backend/internal/auth"
+	"backend/internal/chapter"
+	"backend/internal/course"
 	_ "backend/internal/db/migrations"
 	"backend/internal/router"
 	"backend/internal/user"
@@ -34,14 +36,22 @@ func main() {
 	userService := user.NewService(app)
 	userHandler := user.NewHandler(userService)
 
+	courseService := course.NewService(app)
+	courseHandler := course.Handler(courseService)
+
+	chapterService := chapter.NewService(app)
+	chapterHandler := chapter.NewHandler(chapterService)
+
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		fmt.Println("on serve hook executed")
 
 		router.Register(
 			se.Router,
 			router.Dependencies{
-				Auth: authHandler,
-				User: userHandler,
+				Auth:    authHandler,
+				User:    userHandler,
+				Course:  courseHandler,
+				Chapter: chapterHandler,
 			},
 		)
 
