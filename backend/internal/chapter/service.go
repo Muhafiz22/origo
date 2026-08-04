@@ -1,12 +1,11 @@
 package chapter
 
 import (
+	"backend/internal/apperr"
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/pocketbase/dbx"
-	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 )
 
@@ -21,23 +20,21 @@ func NewService(app core.App) *Service {
 }
 
 func (s *Service) createChapter(courseId string, userId string, req CreateChapterRequest) (ChapterResponse, error) {
+
 	courseRecord, err := s.isValidCourse(courseId)
 	if err != nil {
 		return ChapterResponse{}, err
 	}
 
 	if !isCourseCreator(courseRecord, userId) {
-		return ChapterResponse{}, apis.NewForbiddenError("unauthorised operation", nil)
+		return ChapterResponse{}, apperr.ErrForbidden
 	}
 
 	chapter, err := s.app.FindCollectionByNameOrId("chapters")
-
 	if err != nil {
 		s.app.Logger().Error(
-			"failed to save record in chapters collection",
+			"failed to find chapters collection",
 			"error", err,
-			"error_type", fmt.Sprintf("%T", err),
-			"error_detail", fmt.Sprintf("%+v", err),
 		)
 		return ChapterResponse{}, err
 	}
@@ -53,34 +50,31 @@ func (s *Service) createChapter(courseId string, userId string, req CreateChapte
 	record.Set("order_index", req.OrderIndex)
 	record.Set("courseId", courseId)
 
-	// TODO: map PocketBase validation errors to 4xx responses.
 	if err := s.app.Save(record); err != nil {
 		s.app.Logger().Error(
-			"failed to save record in chapters collection",
+			"failed to save chapter",
 			"error", err,
 		)
-		return ChapterResponse{}, apis.NewInternalServerError("internal server error", nil)
+		return ChapterResponse{}, err
 	}
 
-	response := toChapterResponse(record)
-	return response, nil
+	return toChapterResponse(record), nil
 }
 
 func (s *Service) getChapter(chapterId string) (ChapterResponse, error) {
 	chapterRecord, err := s.app.FindRecordById("chapters", chapterId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return ChapterResponse{}, apis.NewNotFoundError("chapter not found", nil)
+			return ChapterResponse{}, apperr.ErrNotFound
 		}
 
 		s.app.Logger().Error("failed to find chapter record",
 			"error", err,
 		)
-		return ChapterResponse{}, apis.NewInternalServerError("some error occured", nil)
+		return ChapterResponse{}, err
 	}
 
-	response := toChapterResponse(chapterRecord)
-	return response, nil
+	return toChapterResponse(chapterRecord), nil
 }
 
 func (s *Service) listChapters(courseId string) ([]ChapterResponse, error) {
@@ -100,7 +94,7 @@ func (s *Service) listChapters(courseId string) ([]ChapterResponse, error) {
 			"courseId", courseId,
 			"error", err,
 		)
-		return nil, apis.NewInternalServerError("internal server error", nil)
+		return nil, err
 	}
 
 	responses := make([]ChapterResponse, 0, len(allRecords))
@@ -113,5 +107,67 @@ func (s *Service) listChapters(courseId string) ([]ChapterResponse, error) {
 }
 
 func (s *Service) updateChapter(chapterId string, userId string, req UpdateChapterRequest) error {
+	chapterRecord, err := s.isValidChapter(chapterId)
+	if err != nil {
+		return err
+	}
+
+	courseId := chapterRecord.GetString("courseId")
+	courseRecord, err := s.isValidCourse(courseId)
+	if err != nil {
+		return err
+	}
+
+	if !isCourseCreator(courseRecord, userId) {
+		return apperr.ErrForbidden
+	}
+
+	if req.Title != nil {
+		chapterRecord.Set("title", *req.Title)
+	}
+
+	if req.Description != nil {
+		chapterRecord.Set("description", *req.Description)
+	}
+
+	if req.OrderIndex != nil {
+		chapterRecord.Set("order_index", *req.OrderIndex)
+	}
+
+	if err := s.app.Save(chapterRecord); err != nil {
+		s.app.Logger().Error(
+			"failed to save chapter",
+			"error", err,
+		)
+		return err
+	}
+
 	return nil
+}
+
+func (s *Service) deleteChapter(chapterId string, userId string) error {
+	chapterRecord, err := s.isValidChapter(chapterId)
+	if err != nil {
+		return err
+	}
+
+	courseId := chapterRecord.GetString("courseId")
+	courseRecord, err := s.isValidCourse(courseId)
+	if err != nil {
+		return err
+	}
+
+	if !isCourseCreator(courseRecord, userId) {
+		return apperr.ErrForbidden
+	}
+
+	if err := s.app.Delete(chapterRecord); err != nil {
+		s.app.Logger().Error(
+			"failed to delete chapter",
+			"error", err,
+		)
+		return err
+	}
+
+	return err
 }

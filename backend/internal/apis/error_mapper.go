@@ -10,6 +10,7 @@ import (
 // MapError is the single translation boundary between application/domain
 // errors and HTTP-facing apis.*Error. No service should ever import
 // github.com/pocketbase/pocketbase/apis directly — only this file does.
+
 func MapError(err error) error {
 	if err == nil {
 		return nil

@@ -1,10 +1,10 @@
 package chapter
 
 import (
+	"backend/internal/apperr"
 	"database/sql"
 	"errors"
 
-	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 )
 
@@ -25,12 +25,12 @@ func (s *Service) isValidCourse(courseId string) (*core.Record, error) {
 	courseRecord, err := s.app.FindRecordById("courses", courseId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, apis.NewNotFoundError("invalid course", nil)
+			return nil, apperr.ErrNotFound
 		}
 		s.app.Logger().Error("failed to fetch courses collection",
 			"error", err,
 		)
-		return nil, apis.NewInternalServerError("some error occured", nil)
+		return nil, err
 	}
 
 	return courseRecord, nil
@@ -40,13 +40,13 @@ func (s *Service) isValidChapter(chapterId string) (*core.Record, error) {
 	chapterRecord, err := s.app.FindRecordById("chapters", chapterId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, apis.NewNotFoundError("chapter not found", nil)
+			return nil, apperr.ErrNotFound
 		}
 		s.app.Logger().Error("failed to fetch chapters record",
 			"chapterId", chapterId,
 			"error", err,
 		)
-		return nil, apis.NewInternalServerError("something went bad", nil)
+		return nil, err
 	}
 
 	return chapterRecord, nil
