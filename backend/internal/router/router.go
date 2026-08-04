@@ -24,4 +24,5 @@ func Register(r *pocketRouter.Router[*core.RequestEvent], d Dependencies) {
 	auth.RegisterRoutes(r, d.Auth)
 	user.RegisterRoutes(r, d.User)
 	course.RegisterRoutes(r, d.Course)
+	chapter.RegisterRoutes(r, d.Chapter)
 }

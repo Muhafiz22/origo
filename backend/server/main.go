@@ -37,7 +37,7 @@ func main() {
 	userHandler := user.NewHandler(userService)
 
 	courseService := course.NewService(app)
-	courseHandler := course.Handler(courseService)
+	courseHandler := course.NewHandler(courseService)
 
 	chapterService := chapter.NewService(app)
 	chapterHandler := chapter.NewHandler(chapterService)

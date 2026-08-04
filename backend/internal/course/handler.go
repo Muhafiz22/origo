@@ -67,7 +67,7 @@ func (h *Handler) updateCourseHandler(e *core.RequestEvent) error {
 		return err
 	}
 
-	userRecord := e.Auth
+	userId := e.Auth.Id
 	courseId := e.Request.PathValue("id")
 
 	courseRecord, err := h.service.getCourseRecord(courseId)
@@ -78,7 +78,7 @@ func (h *Handler) updateCourseHandler(e *core.RequestEvent) error {
 
 	creatorId := courseRecord.GetString("creatorId")
 
-	if userRecord.Id != creatorId {
+	if userId != creatorId {
 		return apis.NewForbiddenError("Unauthorised user", nil)
 	}
 
@@ -92,7 +92,7 @@ func (h *Handler) updateCourseHandler(e *core.RequestEvent) error {
 }
 
 func (h *Handler) deleteCourseHandler(e *core.RequestEvent) error {
-	userRecord := e.Auth
+	userId := e.Auth.Id
 	courseId := e.Request.PathValue("id")
 
 	courseRecord, err := h.service.getCourseRecord(courseId)
@@ -103,7 +103,7 @@ func (h *Handler) deleteCourseHandler(e *core.RequestEvent) error {
 
 	creatorId := courseRecord.GetString("creatorId")
 
-	if userRecord.Id != creatorId {
+	if userId != creatorId {
 		return apis.NewForbiddenError("unauthorised operation", nil)
 	}
 
