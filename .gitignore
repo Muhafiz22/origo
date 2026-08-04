@@ -1,5 +1,7 @@
 backend/pb_data
+backend/testdata
 backend/bin
+
 .env
 
 *.swp
