@@ -4,17 +4,16 @@ import (
 	"log"
 
 	"github.com/pocketbase/pocketbase/core"
-	"github.com/pocketbase/pocketbase/tools/types"
 )
 
 func CreateSubscriptionCollection(app core.App) *core.Collection {
 	collection := core.NewBaseCollection("subscriptions")
 
-	collection.ListRule = types.Pointer("user = @request.auth.id")
-	collection.ViewRule = types.Pointer("user = @request.auth.id")
-	collection.CreateRule = types.Pointer("@request.auth.id != ''")
+	collection.ListRule = nil
+	collection.ViewRule = nil
+	collection.CreateRule = nil
 	collection.UpdateRule = nil
-	collection.DeleteRule = types.Pointer("user = @request.auth.id")
+	collection.DeleteRule = nil
 
 	users, err := app.FindCollectionByNameOrId("users")
 	if err != nil {

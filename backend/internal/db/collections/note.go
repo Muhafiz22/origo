@@ -4,17 +4,16 @@ import (
 	"log"
 
 	"github.com/pocketbase/pocketbase/core"
-	"github.com/pocketbase/pocketbase/tools/types"
 )
 
 func CreateNoteCollection(app core.App) *core.Collection {
 	collection := core.NewBaseCollection("notes")
 
-	collection.ListRule = types.Pointer("")                                                //all user - access all note
-	collection.ViewRule = types.Pointer("")                                                //all user - access a note
-	collection.CreateRule = types.Pointer("chapter.courseId.creatorId = @request.auth.id") //course creator - creates note
-	collection.UpdateRule = types.Pointer("chapter.courseId.creatorId = @request.auth.id") //course creator = updates note
-	collection.DeleteRule = types.Pointer("chapter.courseId.creatorId = @request.auth.id") //course creator - deletes note
+	collection.ListRule = nil
+	collection.ViewRule = nil
+	collection.CreateRule = nil
+	collection.UpdateRule = nil
+	collection.DeleteRule = nil
 
 	chapters, err := app.FindCollectionByNameOrId("chapters")
 	if err != nil {
@@ -25,7 +24,7 @@ func CreateNoteCollection(app core.App) *core.Collection {
 		&core.TextField{
 			Name:     "title",
 			Required: true,
-			Max:      30,
+			Max:      50,
 		},
 
 		&core.URLField{

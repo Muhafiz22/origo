@@ -2,16 +2,15 @@ package collections
 
 import (
 	"github.com/pocketbase/pocketbase/core"
-	"github.com/pocketbase/pocketbase/tools/types"
 )
 
 func CreateUserCollection(app core.App) *core.Collection {
 	collection := core.NewAuthCollection("users")
 
-	collection.ListRule = types.Pointer("id = @request.auth.id")
-	collection.ViewRule = types.Pointer("id = @request.auth.id")
-	collection.CreateRule = types.Pointer("")
-	collection.UpdateRule = types.Pointer("id = @request.auth.id")
+	collection.ListRule = nil
+	collection.ViewRule = nil
+	collection.CreateRule = nil
+	collection.UpdateRule = nil
 	collection.DeleteRule = nil
 
 	collection.Fields.Add(

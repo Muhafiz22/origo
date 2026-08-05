@@ -4,18 +4,17 @@ import (
 	"log"
 
 	"github.com/pocketbase/pocketbase/core"
-	"github.com/pocketbase/pocketbase/tools/types"
 )
 
 func CreateCourseCollection(app core.App) *core.Collection {
 
 	collection := core.NewBaseCollection("courses")
 
-	collection.ListRule = types.Pointer("")                               //all courses - open for all user()public
-	collection.ViewRule = types.Pointer("")                               //a course - open for all user(public)
-	collection.CreateRule = types.Pointer("@request.auth.id != ''")       //create course - authenticated user only
-	collection.UpdateRule = types.Pointer("creatorId = @request.auth.id") //update course - creator of the course
-	collection.DeleteRule = types.Pointer("creatorId = @request.auth.id") //delete course - creator of the course
+	collection.ListRule = nil
+	collection.ViewRule = nil
+	collection.CreateRule = nil
+	collection.UpdateRule = nil
+	collection.DeleteRule = nil
 
 	users, err := app.FindCollectionByNameOrId("users")
 	if err != nil {
