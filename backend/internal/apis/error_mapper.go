@@ -4,12 +4,7 @@ import (
 	"backend/internal/apperr"
 	"errors"
 	"github.com/pocketbase/pocketbase/apis"
-	"log"
 )
-
-// MapError is the single translation boundary between application/domain
-// errors and HTTP-facing apis.*Error. No service should ever import
-// github.com/pocketbase/pocketbase/apis directly — only this file does.
 
 func MapError(err error) error {
 	if err == nil {
@@ -31,7 +26,6 @@ func MapError(err error) error {
 		return apis.NewBadRequestError(err.Error(), nil)
 
 	default:
-		log.Printf("internal error: %v", err) // log once, here — the failure boundary
 		return apis.NewApiError(500, "internal server error", nil)
 	}
 }

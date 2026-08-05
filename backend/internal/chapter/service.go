@@ -41,13 +41,12 @@ func (s *Service) createChapter(courseId string, userId string, req CreateChapte
 
 	/*
 	   TODO:
-	 1. order index to be auto incremented
+	 1. order index to be implemented for custom re-arranging after MVP.
 	*/
 
 	record := core.NewRecord(chapter)
 	record.Set("title", req.Title)
 	record.Set("description", req.Description)
-	record.Set("order_index", req.OrderIndex)
 	record.Set("courseId", courseId)
 
 	if err := s.app.Save(record); err != nil {
@@ -82,10 +81,14 @@ func (s *Service) listChapters(courseId string) ([]ChapterResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	allRecords, err := s.app.FindAllRecords(
+	allRecords, err := s.app.FindRecordsByFilter(
 		"chapters",
-		dbx.HashExp{
-			"courseId": courseId,
+		"courseId = {:courseId}",
+		"created",
+		0,
+		0,
+		dbx.Params{
+			"courseId": "courseId",
 		},
 	)
 
@@ -130,10 +133,6 @@ func (s *Service) updateChapter(chapterId string, userId string, req UpdateChapt
 		chapterRecord.Set("description", *req.Description)
 	}
 
-	if req.OrderIndex != nil {
-		chapterRecord.Set("order_index", *req.OrderIndex)
-	}
-
 	if err := s.app.Save(chapterRecord); err != nil {
 		s.app.Logger().Error(
 			"failed to save chapter",
@@ -169,5 +168,5 @@ func (s *Service) deleteChapter(chapterId string, userId string) error {
 		return err
 	}
 
-	return err
+	return nil
 }

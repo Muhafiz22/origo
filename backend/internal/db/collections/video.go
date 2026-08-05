@@ -38,11 +38,6 @@ func CreateVideoCollection(app core.App) *core.Collection {
 			Required: true,
 		},
 
-		&core.NumberField{
-			Name:     "order_index",
-			Required: true,
-		},
-
 		&core.RelationField{
 			Name:         "chapter",
 			Required:     true,

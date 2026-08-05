@@ -34,11 +34,6 @@ func CreateChapterCollection(app core.App) *core.Collection {
 			Max:  500,
 		},
 
-		&core.NumberField{
-			Name:     "order_index",
-			Required: true,
-		},
-
 		&core.RelationField{
 			Name:         "courseId",
 			Required:     true,

@@ -14,7 +14,6 @@ func toChapterResponse(record *core.Record) ChapterResponse {
 		CourseId:    record.GetString("courseId"),
 		Title:       record.GetString("title"),
 		Description: record.GetString("description"),
-		OrderIndex:  record.GetInt("order_index"),
 		Created:     record.GetDateTime("created"),
 		Updated:     record.GetDateTime("updated"),
 	}
