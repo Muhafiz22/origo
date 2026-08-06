@@ -1,10 +1,12 @@
 package course
 
 import (
+	"backend/internal/apis"
+	"backend/internal/apperr"
+	"errors"
 	"net/http"
 	"strings"
 
-	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 )
 
@@ -19,43 +21,49 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) createCourseHandler(e *core.RequestEvent) error {
-	user := e.Auth
+	userId := e.Auth.Id
 
 	var req CreateCourseRequest
 	if err := e.BindBody(&req); err != nil {
-		return apis.NewBadRequestError("invalid request body", err)
+		return apis.MapError(err)
 	}
 
-	if strings.TrimSpace(req.Name) == "" || strings.TrimSpace(req.Description) == "" {
-		return apis.NewBadRequestError("name or description cannot be empty", nil)
+	validationErrors := make(map[string]error)
+
+	if strings.TrimSpace(req.Name) == "" {
+		validationErrors["name"] = errors.New("name is required")
 	}
 
-	response, err := h.service.createCourse(user, req)
+	if strings.TrimSpace(req.Description) == "" {
+		validationErrors["description"] = errors.New("description is required")
+	}
+
+	if len(validationErrors) > 0 {
+		return apis.MapError(apperr.FromValidationErrors(validationErrors))
+	}
+
+	response, err := h.service.createCourse(userId, req)
 	if err != nil {
-		return err
+		return apis.MapError(err)
 	}
 
-	return e.JSON(http.StatusOK, response)
+	return e.JSON(http.StatusCreated, response)
 }
 
 func (h *Handler) listCoursesHandler(e *core.RequestEvent) error {
 	responses, err := h.service.listCourses()
 	if err != nil {
-		return err
+		return apis.MapError(err)
 	}
 	return e.JSON(http.StatusOK, responses)
 }
 
 func (h *Handler) getCourseHandler(e *core.RequestEvent) error {
-	id := e.Request.PathValue("id")
+	courseId := e.Request.PathValue("courseId")
 
-	if id == "" {
-		return e.JSON(http.StatusBadRequest, "bad request")
-	}
-
-	response, err := h.service.getCourse(id)
+	response, err := h.service.getCourse(courseId)
 	if err != nil {
-		return err
+		return apis.MapError(err)
 	}
 
 	return e.JSON(http.StatusOK, response)
@@ -64,26 +72,14 @@ func (h *Handler) getCourseHandler(e *core.RequestEvent) error {
 func (h *Handler) updateCourseHandler(e *core.RequestEvent) error {
 	var req UpdateCourseRequest
 	if err := e.BindBody(&req); err != nil {
-		return err
+		return apis.MapError(err)
 	}
 
 	userId := e.Auth.Id
-	courseId := e.Request.PathValue("id")
+	courseId := e.Request.PathValue("courseId")
 
-	courseRecord, err := h.service.getCourseRecord(courseId)
-
-	if err != nil {
-		return err
-	}
-
-	creatorId := courseRecord.GetString("creatorId")
-
-	if userId != creatorId {
-		return apis.NewForbiddenError("Unauthorised user", nil)
-	}
-
-	if err := h.service.updateCourse(courseRecord, req); err != nil {
-		return err
+	if err := h.service.updateCourse(courseId, userId, req); err != nil {
+		return apis.MapError(err)
 	}
 
 	return e.JSON(http.StatusOK, map[string]string{
@@ -93,22 +89,10 @@ func (h *Handler) updateCourseHandler(e *core.RequestEvent) error {
 
 func (h *Handler) deleteCourseHandler(e *core.RequestEvent) error {
 	userId := e.Auth.Id
-	courseId := e.Request.PathValue("id")
+	courseId := e.Request.PathValue("courseId")
 
-	courseRecord, err := h.service.getCourseRecord(courseId)
-
-	if err != nil {
-		return err
-	}
-
-	creatorId := courseRecord.GetString("creatorId")
-
-	if userId != creatorId {
-		return apis.NewForbiddenError("unauthorised operation", nil)
-	}
-
-	if err := h.service.deleteCourse(courseRecord); err != nil {
-		return err
+	if err := h.service.deleteCourse(courseId, userId); err != nil {
+		return apis.MapError(err)
 	}
 
 	return e.JSON(http.StatusOK, map[string]string{

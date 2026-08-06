@@ -21,6 +21,8 @@ func CreateCourseCollection(app core.App) *core.Collection {
 		log.Fatal("failed to find users collection: %w", err)
 	}
 
+	minPrice := 0.0
+
 	collection.Fields.Add(
 		&core.TextField{
 			Name:     "name",
@@ -31,6 +33,11 @@ func CreateCourseCollection(app core.App) *core.Collection {
 		&core.TextField{
 			Name:     "description",
 			Required: true,
+		},
+
+		&core.NumberField{
+			Name: "price",
+			Min:  &minPrice,
 		},
 
 		&core.RelationField{

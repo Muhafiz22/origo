@@ -1,10 +1,7 @@
 package course
 
 import (
-	"database/sql"
-	"errors"
-
-	"github.com/pocketbase/pocketbase/apis"
+	"backend/internal/apperr"
 	"github.com/pocketbase/pocketbase/core"
 )
 
@@ -18,32 +15,31 @@ func NewService(app core.App) *Service {
 	}
 }
 
-func (s *Service) createCourse(user *core.Record, req CreateCourseRequest) (CourseResponse, error) {
+func (s *Service) createCourse(userId string, req CreateCourseRequest) (CourseResponse, error) {
 	course, err := s.app.FindCollectionByNameOrId("courses")
 	if err != nil {
 		s.app.Logger().Error(
 			"failed to look up course collection",
 			"error", err,
 		)
-		return CourseResponse{}, apis.NewInternalServerError("internal server error", nil)
+		return CourseResponse{}, err
 	}
 
 	record := core.NewRecord(course)
 	record.Set("name", req.Name)
 	record.Set("description", req.Description)
-	record.Set("creatorId", user.Id)
+	record.Set("price", req.Price)
+	record.Set("creatorId", userId)
 
-	err = s.app.Save(record)
-	if err != nil {
+	if err := s.app.Save(record); err != nil {
 		s.app.Logger().Error(
-			"failed to save course record in course creation",
+			"failed to save course",
 			"error", err,
 		)
 		return CourseResponse{}, err
 	}
 
-	response := toCourseResponse(record)
-	return response, nil
+	return toCourseResponse(record), nil
 }
 
 func (s *Service) listCourses() ([]CourseResponse, error) {
@@ -53,7 +49,7 @@ func (s *Service) listCourses() ([]CourseResponse, error) {
 			"failed to look up course collection",
 			"error", err,
 		)
-		return nil, apis.NewInternalServerError("internal server error", err)
+		return nil, err
 	}
 
 	responses := make([]CourseResponse, 0, len(records))
@@ -65,72 +61,63 @@ func (s *Service) listCourses() ([]CourseResponse, error) {
 	return responses, nil
 }
 
-func (s *Service) getCourse(id string) (CourseResponse, error) {
-	record, err := s.app.FindRecordById("courses", id)
+func (s *Service) getCourse(courseId string) (CourseResponse, error) {
+	courseRecord, err := s.isValidCourse(courseId)
 	if err != nil {
-
-		if errors.Is(err, sql.ErrNoRows) { //course do not exist(expected error)
-			return CourseResponse{}, apis.NewNotFoundError("course not found", err)
-		}
-
-		s.app.Logger().Error( //unexpected system error
-			"Failed to retrieve course record",
-			"error", err,
-		)
-		return CourseResponse{}, apis.NewInternalServerError("something went wrong", nil)
+		return CourseResponse{}, err
 	}
 
-	response := toCourseResponse(record)
-
-	return response, nil
+	return toCourseResponse(courseRecord), nil
 }
 
-func (s *Service) getCourseRecord(courseId string) (*core.Record, error) {
-	courseRecord, err := s.app.FindRecordById("courses", courseId)
-
+func (s *Service) updateCourse(courseId string, userId string, req UpdateCourseRequest) error {
+	courseRecord, err := s.isValidCourse(courseId)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, apis.NewNotFoundError("course not found", nil)
-		}
-
-		s.app.Logger().Error(
-			"failed to fetch course record",
-			"error", err,
-		)
-
-		return nil, apis.NewInternalServerError("something went wrong", nil)
+		return err
 	}
 
-	return courseRecord, nil
-}
+	if !s.isCourseCreator(courseRecord, userId) {
+		return apperr.ErrForbidden
+	}
 
-func (s *Service) updateCourse(record *core.Record, req UpdateCourseRequest) error {
 	if req.Name != nil {
-		record.Set("name", *req.Name)
+		courseRecord.Set("name", *req.Name)
 	}
 	if req.Description != nil {
-		record.Set("description", *req.Description)
+		courseRecord.Set("description", *req.Description)
 	}
 
-	if err := s.app.Save(record); err != nil {
+	if req.Price != nil {
+		courseRecord.Set("price", *req.Price)
+	}
+
+	if err := s.app.Save(courseRecord); err != nil {
 		s.app.Logger().Error(
-			"failed to save course record while updating",
+			"failed to save course updating",
 			"error", err,
 		)
-
-		return apis.NewInternalServerError("something went wrong, try again.", nil)
+		return err
 	}
 
 	return nil
 }
 
-func (s *Service) deleteCourse(courseRecord *core.Record) error {
+func (s *Service) deleteCourse(courseId string, userId string) error {
+	courseRecord, err := s.isValidCourse(courseId)
+	if err != nil {
+		return err
+	}
+
+	if !s.isCourseCreator(courseRecord, userId) {
+		return apperr.ErrForbidden
+	}
+
 	if err := s.app.Delete(courseRecord); err != nil {
-		s.app.Logger().Error("failed to delete course record",
+		s.app.Logger().Error("failed to delete course",
 			"error", err,
 		)
-
-		return apis.NewInternalServerError("something went wrong", nil)
+		return err
 	}
+
 	return nil
 }
