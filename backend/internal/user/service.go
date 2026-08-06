@@ -40,6 +40,10 @@ func (s *Service) updateUserProfile(record *core.Record, req UpdateUserProfileRe
 	}
 
 	if err := s.app.Save(record); err != nil {
+		s.app.Logger().Error(
+			"failed to update user profile",
+			"error", err,
+		)
 		return err
 	}
 
