@@ -20,25 +20,49 @@ func CreateVideoCollection(app core.App) *core.Collection {
 		log.Fatal("failed to find chapters collection ", err)
 	}
 
+	min := 0.0
+
 	collection.Fields.Add(
 		&core.TextField{
 			Name:     "title",
 			Required: true,
-			Max:      30,
+			Max:      100,
 		},
 
-		&core.URLField{
-			Name:     "file_url",
-			Required: true,
+		&core.TextField{
+			Name: "description",
+			Max:  500,
+		},
+
+		&core.FileField{
+			Name:      "video",
+			Required:  true,
+			MaxSelect: 1,
+			MimeTypes: []string{
+				"video/mp4",
+			},
+		},
+
+		&core.FileField{
+			Name:      "thumbnail",
+			Required:  true,
+			MaxSelect: 1,
+			MimeTypes: []string{
+				"image/jpg",
+				"image/png",
+				"image/webp",
+			},
 		},
 
 		&core.NumberField{
 			Name:     "duration",
 			Required: true,
+			OnlyInt:  true,
+			Min:      &min,
 		},
 
 		&core.RelationField{
-			Name:         "chapter",
+			Name:         "chapterId",
 			Required:     true,
 			CollectionId: chapters.Id,
 			MaxSelect:    1,
