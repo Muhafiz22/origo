@@ -17,6 +17,14 @@ func NewService(app core.App) *Service {
 	}
 }
 
+func (s *Service) Filesystem() (*filesystem.System, error) {
+	fsys, err := s.app.NewFilesystem()
+	if err != nil {
+		return nil, err
+	}
+	return fsys, nil
+}
+
 func (s *Service) createVideo(chapterId string, userId string, req CreateVideoRequest, videoFile, thumbnailFile *filesystem.File) (VideoMetadataResponse, error) {
 	chapterRecord, err := s.isValidChapter(chapterId)
 	if err != nil {
@@ -59,10 +67,99 @@ func (s *Service) createVideo(chapterId string, userId string, req CreateVideoRe
 	return toVideoMetadataResponse(record), nil
 }
 
-func (s *Service) getVideoMetadata() error {
+func (s *Service) getVideoMetadata(videoId string) (VideoMetadataResponse, error) {
+	videoRecord, err := s.isValidVideo(videoId)
+	if err != nil {
+		return VideoMetadataResponse{}, err
+	}
+	return toVideoMetadataResponse(videoRecord), nil
+}
+
+func (s *Service) getVideoForContent(videoId string) (*core.Record, error) {
+	videoRecord, err := s.isValidVideo(videoId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.canAccessVideo(videoRecord); err != nil {
+		return nil, err
+	}
+
+	return videoRecord, nil
+}
+
+func (s *Service) updateVideo(userId string, videoId string, req UpdateVideoRequest) error {
+	videoRecord, err := s.isValidVideo(videoId)
+	if err != nil {
+		return err
+	}
+
+	chapterId := videoRecord.GetString("chapterId")
+	chapterRecord, err := s.isValidChapter(chapterId)
+	if err != nil {
+		return err
+	}
+
+	courseId := chapterRecord.GetString("courseId")
+	courseRecord, err := s.isValidCourse(courseId)
+	if err != nil {
+		return err
+	}
+
+	if !isCourseCreator(courseRecord, userId) {
+		return apperr.ErrForbidden
+	}
+
+	if req.Title != nil {
+		videoRecord.Set("title", *req.Title)
+	}
+	if req.Description != nil {
+		videoRecord.Set("description", *req.Description)
+	}
+	if req.Duration != nil {
+		videoRecord.Set("duration", *req.Duration)
+	}
+
+	if err := s.app.Save(videoRecord); err != nil {
+		s.app.Logger().Error(
+			"failed to save video",
+			"error", err,
+		)
+		return err
+	}
+
 	return nil
 }
 
-func (s *Service) getVideoContent() error {
+func (s *Service) deleteVideo(userId string, videoId string) error {
+	videoRecord, err := s.isValidVideo(videoId)
+	if err != nil {
+		return err
+	}
+
+	chapterId := videoRecord.GetString("chapterId")
+	chapterRecord, err := s.isValidChapter(chapterId)
+	if err != nil {
+		return err
+	}
+
+	courseId := chapterRecord.GetString("courseId")
+	courseRecord, err := s.isValidCourse(courseId)
+	if err != nil {
+		return err
+	}
+
+	if !isCourseCreator(courseRecord, userId) {
+		return apperr.ErrForbidden
+	}
+
+	if err := s.app.Delete(videoRecord); err != nil {
+		s.app.Logger().Error(
+			"failed to delete video",
+			"error", err,
+		)
+		return err
+	}
+
 	return nil
 }

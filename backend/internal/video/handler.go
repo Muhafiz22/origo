@@ -74,17 +74,66 @@ func (h *Handler) createVideoHandler(e *core.RequestEvent) error {
 }
 
 func (h *Handler) updateVideoHandler(e *core.RequestEvent) error {
-	return nil
+	var req UpdateVideoRequest
+	if err := e.BindBody(&req); err != nil {
+		return apis.MapError(err)
+	}
+
+	userId := e.Auth.Id
+	videoId := e.Request.PathValue("videoId")
+
+	if err := h.service.updateVideo(userId, videoId, req); err != nil {
+		return apis.MapError(err)
+	}
+
+	return e.JSON(http.StatusOK, map[string]string{
+		"message": "video updated succcessfully",
+	})
 }
 
 func (h *Handler) getVideoMetadataHandler(e *core.RequestEvent) error {
-	return nil
+	videoId := e.Request.PathValue("videoId")
+	response, err := h.service.getVideoMetadata(videoId)
+	if err != nil {
+		return apis.MapError(err)
+	}
+	return e.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) getVideoContentHandler(e *core.RequestEvent) error {
-	return nil
+	videoId := e.Request.PathValue("videoId")
+
+	videoRecord, err := h.service.getVideoForContent(videoId)
+	if err != nil {
+		return apis.MapError(err)
+	}
+
+	fsys, err := h.service.Filesystem()
+	if err != nil {
+		return apis.MapError(err)
+	}
+	defer fsys.Close()
+
+	filename := videoRecord.GetString("video")
+	filePath := videoRecord.BaseFilesPath() + "/" + filename
+
+	return fsys.Serve(
+		e.Response,
+		e.Request,
+		filePath,
+		filename,
+	)
 }
 
 func (h *Handler) deleteVideoHandler(e *core.RequestEvent) error {
-	return nil
+	userId := e.Auth.Id
+	videoId := e.Request.PathValue("videoId")
+
+	if err := h.service.deleteVideo(userId, videoId); err != nil {
+		return apis.MapError(err)
+	}
+
+	return e.JSON(http.StatusOK, map[string]string{
+		"message": "video deleted successfully",
+	})
 }

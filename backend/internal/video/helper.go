@@ -66,6 +66,22 @@ func isValidThumbnailFile(header *multipart.FileHeader) error {
 	return nil
 }
 
+func (s *Service) isValidVideo(videoId string) (*core.Record, error) {
+	videoRecord, err := s.app.FindRecordById("videos", videoId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperr.ErrNotFound
+		}
+		s.app.Logger().Error(
+			"failed to fetch video from videos collection",
+			"error", err,
+		)
+		return nil, err
+	}
+
+	return videoRecord, nil
+}
+
 func (s *Service) isValidChapter(chapterId string) (*core.Record, error) {
 	chapterRecord, err := s.app.FindRecordById("chapters", chapterId)
 
@@ -102,4 +118,25 @@ func (s *Service) isValidCourse(courseId string) (*core.Record, error) {
 
 func isCourseCreator(courseRecord *core.Record, userId string) bool {
 	return courseRecord.GetString("creatorId") == userId
+}
+
+func (s *Service) canAccessVideo(videoRecord *core.Record) error {
+	chapterId := videoRecord.GetString("chapterId")
+	chapterRecord, err := s.isValidChapter(chapterId)
+	if err != nil {
+		return err
+	}
+
+	courseId := chapterRecord.GetString("courseId")
+	courseRecord, err := s.isValidCourse(courseId)
+	if err != nil {
+		return err
+	}
+
+	price := courseRecord.GetFloat("price")
+	if price > 0 {
+		return apperr.ErrForbidden
+	}
+
+	return nil
 }
