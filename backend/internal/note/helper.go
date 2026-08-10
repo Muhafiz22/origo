@@ -1,4 +1,4 @@
-package video
+package note
 
 import (
 	"backend/internal/apperr"
@@ -11,87 +11,74 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
-func toVideoMetadataResponse(record *core.Record) VideoMetadataResponse {
-	response := VideoMetadataResponse{
+func toNoteMetadataResponse(record *core.Record) NoteMetadataResponse {
+	return NoteMetadataResponse{
 		Id:          record.Id,
 		ChapterId:   record.GetString("chapterId"),
 		Title:       record.GetString("title"),
 		Description: record.GetString("description"),
-		Duration:    record.GetInt("duration"),
 		Created:     record.GetString("created"),
 	}
-	return response
 }
 
-func isValidVideoFile(header *multipart.FileHeader) error {
-	if strings.ToLower(filepath.Ext(header.Filename)) != ".mp4" {
-		return apperr.FromValidationErrors(map[string]error{
-			"video": errors.New("video must be an MP4 file"),
-		})
-	}
-
-	if header.Header.Get("Content-Type") != "video/mp4" {
-		return apperr.FromValidationErrors(map[string]error{
-			"video": errors.New("video must be an MP4 file"),
-		})
-	}
-
-	return nil
-}
-
-func isValidThumbnailFile(header *multipart.FileHeader) error {
+func isValidNoteFile(header *multipart.FileHeader) error {
 	ext := strings.ToLower(filepath.Ext(header.Filename))
-
-	switch ext {
-	case ".jpg", ".jpeg", ".png", ".webp":
-
-	default:
-		return apperr.FromValidationErrors(map[string]error{
-			"thumbnail": errors.New("thumbnail must be a JPG, PNG, or WebP image"),
-		})
-	}
-
 	contentType := header.Header.Get("Content-Type")
 
-	switch contentType {
-	case "image/jpeg", "image/png", "image/webp":
+	allowedTypes := map[string]string{
+		".pdf":  "application/pdf",
+		".ppt":  "application/vnd.ms-powerpoint",
+		".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+		".doc":  "application/msword",
+		".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		".txt":  "text/plain",
+		".md":   "text/markdown",
+		".png":  "image/png",
+		".jpg":  "image/jpeg",
+		".jpeg": "image/jpeg",
+		".webp": "image/webp",
+	}
 
-	default:
+	expectedContentType, ok := allowedTypes[ext]
+	if !ok || contentType != expectedContentType {
 		return apperr.FromValidationErrors(map[string]error{
-			"thumbnail": errors.New("thumbnail must be a JPG, PNG, or WebP image"),
+			"note": errors.New("unsupported file format"),
 		})
 	}
 
 	return nil
 }
 
-func (s *Service) isValidVideo(videoId string) (*core.Record, error) {
-	videoRecord, err := s.app.FindRecordById("videos", videoId)
+func (s *Service) isValidNote(noteId string) (*core.Record, error) {
+	noteRecord, err := s.app.FindRecordById("notes", noteId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, apperr.ErrNotFound
 		}
+
 		s.app.Logger().Error(
-			"failed to fetch video from videos collection",
+			"failed to fetch note from notes collection",
 			"error", err,
 		)
+
 		return nil, err
 	}
 
-	return videoRecord, nil
+	return noteRecord, nil
 }
 
 func (s *Service) isValidChapter(chapterId string) (*core.Record, error) {
 	chapterRecord, err := s.app.FindRecordById("chapters", chapterId)
-
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, apperr.ErrNotFound
 		}
+
 		s.app.Logger().Error(
-			"failed to fetch chapters collection",
+			"failed to fetch chapter from chapters collection",
 			"error", err,
 		)
+
 		return nil, err
 	}
 
@@ -100,15 +87,16 @@ func (s *Service) isValidChapter(chapterId string) (*core.Record, error) {
 
 func (s *Service) isValidCourse(courseId string) (*core.Record, error) {
 	courseRecord, err := s.app.FindRecordById("courses", courseId)
-
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, apperr.ErrNotFound
 		}
+
 		s.app.Logger().Error(
-			"failed to fetch courses collection",
+			"failed to fetch course from courses collection",
 			"error", err,
 		)
+
 		return nil, err
 	}
 
@@ -119,21 +107,22 @@ func isCourseCreator(courseRecord *core.Record, userId string) bool {
 	return courseRecord.GetString("creatorId") == userId
 }
 
-func (s *Service) canAccessVideo(videoRecord *core.Record) error {
-	chapterId := videoRecord.GetString("chapterId")
+func (s *Service) canAccessNote(noteRecord *core.Record) error {
+	chapterId := noteRecord.GetString("chapterId")
+
 	chapterRecord, err := s.isValidChapter(chapterId)
 	if err != nil {
 		return err
 	}
 
 	courseId := chapterRecord.GetString("courseId")
+
 	courseRecord, err := s.isValidCourse(courseId)
 	if err != nil {
 		return err
 	}
 
-	price := courseRecord.GetFloat("price")
-	if price > 0 {
+	if courseRecord.GetFloat("price") > 0 {
 		return apperr.ErrForbidden
 	}
 

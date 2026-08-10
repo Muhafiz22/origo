@@ -21,13 +21,13 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) createVideoHandler(e *core.RequestEvent) error {
-	userId := e.Auth.Id
-	chapterId := e.Request.PathValue("chapterId")
-
 	var req CreateVideoRequest
 	if err := e.BindBody(&req); err != nil {
 		return apis.MapError(err)
 	}
+
+	userId := e.Auth.Id
+	chapterId := e.Request.PathValue("chapterId")
 
 	validationErrors := make(map[string]error)
 
@@ -73,24 +73,6 @@ func (h *Handler) createVideoHandler(e *core.RequestEvent) error {
 	return e.JSON(http.StatusCreated, response)
 }
 
-func (h *Handler) updateVideoHandler(e *core.RequestEvent) error {
-	var req UpdateVideoRequest
-	if err := e.BindBody(&req); err != nil {
-		return apis.MapError(err)
-	}
-
-	userId := e.Auth.Id
-	videoId := e.Request.PathValue("videoId")
-
-	if err := h.service.updateVideo(userId, videoId, req); err != nil {
-		return apis.MapError(err)
-	}
-
-	return e.JSON(http.StatusOK, map[string]string{
-		"message": "video updated succcessfully",
-	})
-}
-
 func (h *Handler) getVideoMetadataHandler(e *core.RequestEvent) error {
 	videoId := e.Request.PathValue("videoId")
 	response, err := h.service.getVideoMetadata(videoId)
@@ -123,6 +105,24 @@ func (h *Handler) getVideoContentHandler(e *core.RequestEvent) error {
 		filePath,
 		filename,
 	)
+}
+
+func (h *Handler) updateVideoHandler(e *core.RequestEvent) error {
+	var req UpdateVideoRequest
+	if err := e.BindBody(&req); err != nil {
+		return apis.MapError(err)
+	}
+
+	userId := e.Auth.Id
+	videoId := e.Request.PathValue("videoId")
+
+	if err := h.service.updateVideo(userId, videoId, req); err != nil {
+		return apis.MapError(err)
+	}
+
+	return e.JSON(http.StatusOK, map[string]string{
+		"message": "video updated succcessfully",
+	})
 }
 
 func (h *Handler) deleteVideoHandler(e *core.RequestEvent) error {

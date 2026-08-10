@@ -13,13 +13,12 @@ type UpdateVideoRequest struct {
 }
 
 type VideoMetadataResponse struct {
-	ID           string `json:"id"`
-	ChapterID    string `json:"chapterId"`
-	Title        string `json:"title"`
-	Description  string `json:"description"`
-	ThumbnailURL string `json:"thumbnailUrl"`
-	Duration     int    `json:"duration"`
-	Created      string `json:"created"`
+	Id          string `json:"id"`
+	ChapterId   string `json:"chapterId"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Duration    int    `json:"duration"`
+	Created     string `json:"created"`
 }
 
 type VideoContentResponse struct {

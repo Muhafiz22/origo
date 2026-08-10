@@ -24,11 +24,16 @@ func CreateNoteCollection(app core.App) *core.Collection {
 		&core.TextField{
 			Name:     "title",
 			Required: true,
-			Max:      50,
+			Max:      100,
 		},
 
-		&core.URLField{
-			Name:     "file_url",
+		&core.TextField{
+			Name: "description",
+			Max:  500,
+		},
+
+		&core.FileField{
+			Name:     "note",
 			Required: true,
 		},
 
