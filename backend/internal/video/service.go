@@ -25,6 +25,13 @@ func (s *Service) Filesystem() (*filesystem.System, error) {
 	return fsys, nil
 }
 
+/*
+
+HACK:
+	1. improve function parameters passing for createVideo()
+
+*/
+
 func (s *Service) createVideo(chapterId string, userId string, req CreateVideoRequest, videoFile, thumbnailFile *filesystem.File) (VideoMetadataResponse, error) {
 	chapterRecord, err := s.isValidChapter(chapterId)
 	if err != nil {

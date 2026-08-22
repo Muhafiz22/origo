@@ -1,0 +1,71 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap");
+
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", serif;
+  --font-body: "Source Sans 3", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+@plugin "daisyui" {
+  themes: origo;
+}
+
+@plugin "daisyui/theme" {
+  name: "origo";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  /* Origo — Fog */
+  --color-base-100: #f5f6f3;
+  --color-base-200: #eef0ed;
+  --color-base-300: #dfe3de;
+  --color-base-content: #1d2b4f;
+
+  /* Origo — Brass */
+  --color-primary: #c08a3e;
+  --color-primary-content: #ffffff;
+
+  /* Origo — Moss */
+  --color-secondary: #4a7856;
+  --color-secondary-content: #ffffff;
+
+  /* Origo — Rust */
+  --color-accent: #b4453a;
+  --color-accent-content: #ffffff;
+
+  /* Origo — Slate */
+  --color-neutral: #22262b;
+  --color-neutral-content: #f5f6f3;
+
+  /* Semantic colors */
+  --color-info: #4f6f8f;
+  --color-info-content: #ffffff;
+
+  --color-success: #4a7856;
+  --color-success-content: #ffffff;
+
+  --color-warning: #d9a441;
+  --color-warning-content: #1d2b4f;
+
+  --color-error: #b13b3b;
+  --color-error-content: #ffffff;
+
+  /* Component shape */
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+
+  /* Minimal DaisyUI depth */
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@layer base {
+  body {
+    @apply bg-base-100 text-base-content font-body antialiased;
+  }
+}
