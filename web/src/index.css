@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap");
 
 @import "tailwindcss";
 
@@ -6,66 +6,171 @@
   --font-display: "Fraunces", serif;
   --font-body: "Source Sans 3", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
+  --font-arabic: "Amiri", serif;
 }
 
 @plugin "daisyui" {
-  themes: origo;
+  themes: origo-light --default, origo-dark --prefersdark;
 }
 
+/* =========================================================
+   ORIGO — Light Theme
+   Parchment / ink / brass
+   ========================================================= */
+
 @plugin "daisyui/theme" {
-  name: "origo";
+  name: "origo-light";
   default: true;
   prefersdark: false;
   color-scheme: light;
 
-  /* Origo — Fog */
-  --color-base-100: #f5f6f3;
-  --color-base-200: #eef0ed;
-  --color-base-300: #dfe3de;
-  --color-base-content: #1d2b4f;
+  /* Surfaces */
+  --color-base-100: #f4e9d0;
+  --color-base-200: #ede0c8;
+  --color-base-300: #dcc7a0;
+  --color-base-content: #3e2b20;
 
-  /* Origo — Brass */
-  --color-primary: #c08a3e;
-  --color-primary-content: #ffffff;
+  /* Brand / structure */
+  --color-primary: #4b3b2a;
+  --color-primary-content: #f4e9d0;
 
-  /* Origo — Moss */
-  --color-secondary: #4a7856;
-  --color-secondary-content: #ffffff;
+  --color-secondary: #3b3f2f;
+  --color-secondary-content: #ede0c8;
 
-  /* Origo — Rust */
-  --color-accent: #b4453a;
-  --color-accent-content: #ffffff;
+  /* Signature brass */
+  --color-accent: #c89b4a;
+  --color-accent-content: #3e2b20;
 
-  /* Origo — Slate */
-  --color-neutral: #22262b;
-  --color-neutral-content: #f5f6f3;
+  /* Utility */
+  --color-neutral: #2c2e30;
+  --color-neutral-content: #ede0c8;
 
-  /* Semantic colors */
-  --color-info: #4f6f8f;
-  --color-info-content: #ffffff;
+  --color-info: #1b2438;
+  --color-info-content: #ede0c8;
 
-  --color-success: #4a7856;
-  --color-success-content: #ffffff;
+  --color-success: #6e7245;
+  --color-success-content: #f4e9d0;
 
-  --color-warning: #d9a441;
-  --color-warning-content: #1d2b4f;
+  --color-warning: #b87333;
+  --color-warning-content: #f4e9d0;
 
-  --color-error: #b13b3b;
-  --color-error-content: #ffffff;
+  --color-error: #5c2a2e;
+  --color-error-content: #ede0c8;
 
-  /* Component shape */
-  --radius-selector: 0.375rem;
-  --radius-field: 0.375rem;
+  /* Shape */
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
   --radius-box: 0.5rem;
 
-  /* Minimal DaisyUI depth */
+  /* Flat / editorial */
   --border: 1px;
   --depth: 0;
   --noise: 0;
 }
 
+/* =========================================================
+   ORIGO — Dark Theme
+   Espresso / leather / parchment / brass
+   ========================================================= */
+
+@plugin "daisyui/theme" {
+  name: "origo-dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: dark;
+
+  /* Surfaces */
+  --color-base-100: #1b1712;
+  --color-base-200: #241e17;
+  --color-base-300: #2f281f;
+  --color-base-content: #ede0c8;
+
+  /* Interactive brass */
+  --color-primary: #c89b4a;
+  --color-primary-content: #1b1712;
+
+  /* Book leather / structural warmth */
+  --color-secondary: #4b3b2a;
+  --color-secondary-content: #ede0c8;
+
+  /* Gilded emphasis */
+  --color-accent: #d2aa5c;
+  --color-accent-content: #1b1712;
+
+  /* Utility */
+  --color-neutral: #2c2e30;
+  --color-neutral-content: #ede0c8;
+
+  --color-info: #4c6a8c;
+  --color-info-content: #1b1712;
+
+  --color-success: #6e7245;
+  --color-success-content: #ede0c8;
+
+  --color-warning: #b87333;
+  --color-warning-content: #1b1712;
+
+  --color-error: #8b3a3e;
+  --color-error-content: #ede0c8;
+
+  /* Shape */
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+
+  /* Flat / editorial */
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* =========================================================
+   ORIGO — Global Base
+   ========================================================= */
+
 @layer base {
   body {
     @apply bg-base-100 text-base-content font-body antialiased;
   }
+
+  ::selection {
+    @apply bg-accent text-accent-content;
+  }
+}
+
+/* =========================================================
+   ORIGO — Paper Texture
+   ========================================================= */
+
+.paper {
+  position: relative;
+}
+
+.paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  background-size: 200px 200px;
+
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.paper > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Dark paper needs slightly stronger grain. */
+
+[data-theme="origo-dark"] .paper::before {
+  opacity: 0.06;
+  mix-blend-mode: overlay;
 }
