@@ -1,5 +1,13 @@
 package auth
 
+type UserProfileResponse struct {
+	UserId   string `json:"userId"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Verified bool   `json:"verified"`
+	Avatar   string `json:"avatar"`
+}
+
 // POST /auth/register
 type RegisterRequest struct { //client -> server
 	Username string `json:"username"`

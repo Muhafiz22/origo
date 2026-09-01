@@ -19,6 +19,17 @@ func NewService(app core.App) *Service {
 	}
 }
 
+func (s *Service) authenticateMe(record *core.Record) UserProfileResponse {
+	response := UserProfileResponse{
+		UserId:   record.Id,
+		Name:     record.GetString("name"),
+		Email:    record.GetString("email"),
+		Verified: record.GetBool("verified"),
+		Avatar:   record.GetString("avatar"),
+	}
+	return response
+}
+
 func (s *Service) registerUser(req RegisterRequest) (RegisterResponse, error) {
 	collection, err := s.app.FindCollectionByNameOrId("users")
 	if err != nil {

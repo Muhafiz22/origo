@@ -1,9 +1,12 @@
 package auth
 
 import (
+	"backend/internal/apis"
+	"backend/internal/apperr"
+	"errors"
 	"net/http"
 
-	"github.com/pocketbase/pocketbase/apis"
+	pbApis "github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 )
 
@@ -17,58 +20,63 @@ func NewHandler(service *Service) *Handler {
 	}
 }
 
+func (h *Handler) authenticateMeHandler(e *core.RequestEvent) error {
+	user := e.Auth
+	response := h.service.authenticateMe(user)
+	return e.JSON(http.StatusOK, response)
+}
+
 func (h *Handler) registerHandler(e *core.RequestEvent) error {
 	var req RegisterRequest
-
 	if err := e.BindBody(&req); err != nil {
-		return err
+		return apis.MapError(err)
 	}
 
+	validationErrors := make(map[string]error)
 	if req.Username == "" {
-		return apis.NewBadRequestError("username is required", nil)
+		validationErrors["username"] = errors.New("username cannot be empty")
 	}
-
 	if req.Email == "" {
-		return apis.NewBadRequestError("email is required", nil)
+		validationErrors["email"] = errors.New("email cannot be empty")
 	}
-
 	if req.Password == "" {
-		return apis.NewBadRequestError("password is required", nil)
+		validationErrors["password"] = errors.New("password cannot be empty")
+	} else if len(req.Password) < 8 {
+		validationErrors["password"] = errors.New("password must be at least 8 characters")
 	}
-
-	if len(req.Password) < 8 {
-		return apis.NewBadRequestError("password must be of atleast 8 characters", nil)
+	if len(validationErrors) > 0 {
+		return apis.MapError(apperr.FromValidationErrors(validationErrors))
 	}
 
 	result, err := h.service.registerUser(req)
-
 	if err != nil {
-		return err
+		return apis.MapError(err)
 	}
 
 	resp := RegisterResponse{
 		UserId:           result.UserId,
 		VerificationSent: result.VerificationSent,
 	}
-
 	return e.JSON(http.StatusCreated, resp)
 }
 
 func (h *Handler) resendVerificationHandler(e *core.RequestEvent) error {
 	var req ResendVerificationRequest
-
 	if err := e.BindBody(&req); err != nil {
-		return err
+		return apis.MapError(err)
 	}
 
+	validationErrors := make(map[string]error)
 	if req.Email == "" {
-		return apis.NewBadRequestError("email is required", nil)
+		validationErrors["email"] = errors.New("email cannot be empty")
+	}
+	if len(validationErrors) > 0 {
+		return apis.MapError(apperr.FromValidationErrors(validationErrors))
 	}
 
 	if err := h.service.resendVerification(req); err != nil {
-		return err
+		return apis.MapError(err)
 	}
-
 	return e.JSON(http.StatusOK, map[string]string{
 		"message": "if the email is registered, a verification link has been sent",
 	})
@@ -76,19 +84,21 @@ func (h *Handler) resendVerificationHandler(e *core.RequestEvent) error {
 
 func (h *Handler) verifyHandler(e *core.RequestEvent) error {
 	var req VerifyRequest
-
 	if err := e.BindBody(&req); err != nil {
-		return err
+		return apis.MapError(err)
 	}
 
+	validationErrors := make(map[string]error)
 	if req.Token == "" {
-		return apis.NewBadRequestError("token is required", nil)
+		validationErrors["token"] = errors.New("invalid token")
+	}
+	if len(validationErrors) > 0 {
+		return apis.MapError(apperr.FromValidationErrors(validationErrors))
 	}
 
 	if err := h.service.verifyUser(req); err != nil {
-		return err
+		return apis.MapError(err)
 	}
-
 	return e.JSON(http.StatusOK, map[string]string{
 		"message": "user verification successful",
 	})
@@ -97,35 +107,45 @@ func (h *Handler) verifyHandler(e *core.RequestEvent) error {
 func (h *Handler) loginHandler(e *core.RequestEvent) error {
 	var req LoginRequest
 	if err := e.BindBody(&req); err != nil {
-		return err
+		return apis.MapError(err)
 	}
 
-	if req.Identity == "" || req.Password == "" {
-		return apis.NewBadRequestError("identity and password are required", nil)
+	validationErrors := make(map[string]error)
+	if req.Identity == "" {
+		validationErrors["identity"] = errors.New("identity cannot be empty")
+	}
+	if req.Password == "" {
+		validationErrors["password"] = errors.New("password cannot be empty")
+	}
+	if len(validationErrors) > 0 {
+		return apis.MapError(apperr.FromValidationErrors(validationErrors))
 	}
 
 	record, err := h.service.authenticate(req)
 	if err != nil {
-		return err
+		return apis.MapError(err)
 	}
 
-	return apis.RecordAuthResponse(e, record, "password", nil)
+	return pbApis.RecordAuthResponse(e, record, "password", nil)
 }
 
 func (h *Handler) forgotPasswordHandler(e *core.RequestEvent) error {
 	var req ForgotPasswordRequest
 	if err := e.BindBody(&req); err != nil {
-		return err
+		return apis.MapError(err)
 	}
 
+	validationErrors := make(map[string]error)
 	if req.Email == "" {
-		return apis.NewBadRequestError("email is required", nil)
+		validationErrors["email"] = errors.New("email cannot be empty")
+	}
+	if len(validationErrors) > 0 {
+		return apis.MapError(apperr.FromValidationErrors(validationErrors))
 	}
 
 	if err := h.service.sendPasswordResetEmail(req); err != nil {
-		return err
+		return apis.MapError(err)
 	}
-
 	return e.JSON(http.StatusOK, map[string]string{
 		"message": "if the email is registered, a password reset link has been sent",
 	})
@@ -134,21 +154,25 @@ func (h *Handler) forgotPasswordHandler(e *core.RequestEvent) error {
 func (h *Handler) resetPasswordHandler(e *core.RequestEvent) error {
 	var req ResetPasswordRequest
 	if err := e.BindBody(&req); err != nil {
-		return err
+		return apis.MapError(err)
 	}
 
-	if req.Token == "" || req.NewPassword == "" {
-		return apis.NewBadRequestError("invalid input", nil)
+	validationErrors := make(map[string]error)
+	if req.Token == "" {
+		validationErrors["token"] = errors.New("token cannot be empty")
 	}
-
-	if len(req.NewPassword) < 8 {
-		return apis.NewBadRequestError("password must be of atleast 8 characters", nil)
+	if req.NewPassword == "" {
+		validationErrors["password"] = errors.New("password cannot be empty")
+	} else if len(req.NewPassword) < 8 {
+		validationErrors["password"] = errors.New("password must be at least 8 characters")
+	}
+	if len(validationErrors) > 0 {
+		return apis.MapError(apperr.FromValidationErrors(validationErrors))
 	}
 
 	if err := h.service.resetPassword(req); err != nil {
-		return err
+		return apis.MapError(err)
 	}
-
 	return e.JSON(http.StatusOK, map[string]string{
 		"message": "password reset successful",
 	})
