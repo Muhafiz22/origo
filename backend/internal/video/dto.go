@@ -1,9 +1,9 @@
 package video
 
 type CreateVideoRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Duration    int    `json:"duration"`
+	Title       string `json:"title" form:"title"`
+	Description string `json:"description" form:"description"`
+	Duration    int    `json:"duration" form:"duration"`
 }
 
 type UpdateVideoRequest struct {

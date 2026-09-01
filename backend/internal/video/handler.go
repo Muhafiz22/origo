@@ -137,3 +137,14 @@ func (h *Handler) deleteVideoHandler(e *core.RequestEvent) error {
 		"message": "video deleted successfully",
 	})
 }
+
+func (h *Handler) listVideosHandler(e *core.RequestEvent) error {
+	chapterId := e.Request.PathValue("chapterId")
+
+	responses, err := h.service.listVideos(chapterId)
+	if err != nil {
+		return apis.MapError(err)
+	}
+
+	return e.JSON(http.StatusOK, responses)
+}

@@ -3,6 +3,7 @@ package video
 import (
 	"backend/internal/apperr"
 
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/filesystem"
 )
@@ -169,4 +170,34 @@ func (s *Service) deleteVideo(userId string, videoId string) error {
 	}
 
 	return nil
+}
+
+func (s *Service) listVideos(chapterId string) ([]VideoMetadataResponse, error) {
+	allRecords, err := s.app.FindRecordsByFilter(
+		"videos",
+		"chapterId = {:chapterId}",
+		"created",
+		0,
+		0,
+		dbx.Params{
+			"chapterId": chapterId,
+		},
+	)
+
+	if err != nil {
+		s.app.Logger().Error(
+			"failed to fetch videos record",
+			"chapterId", chapterId,
+			"error", err,
+		)
+		return nil, err
+	}
+
+	responses := make([]VideoMetadataResponse, 0, len(allRecords))
+
+	for _, record := range allRecords {
+		responses = append(responses, toVideoMetadataResponse(record))
+	}
+
+	return responses, nil
 }
