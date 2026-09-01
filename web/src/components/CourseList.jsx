@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getCourses } from "../services/courseServices";
+import CourseCard from "./CourseCard";
 
 function CourseList() {
   const [courses, setCourses] = useState([]);
@@ -13,7 +14,7 @@ function CourseList() {
 
         setCourses(data);
       } catch (error) {
-        setError(error.message);
+        setError(error);
       } finally {
         setLoading(false);
       }
@@ -27,7 +28,7 @@ function CourseList() {
   }
 
   if (error) {
-    return <p>Error: {error}</p>;
+    return <p>Error: {error.message}</p>;
   }
 
   if (courses.length === 0) {
@@ -35,14 +36,11 @@ function CourseList() {
   }
 
   return (
-    <main>
+    <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
       {courses.map((course) => (
-        <article key={course.id}>
-          <h2>{course.title}</h2>
-          <p>{course.description}</p>
-        </article>
+        <CourseCard key={course.courseId} course={course} />
       ))}
-    </main>
+    </div>
   );
 }
 

@@ -4,6 +4,6 @@ export function getCourses() {
   return apiClient("/courses");
 }
 
-export function getCourse(id) {
-  return apiClient(`/courses/${id}`);
+export function getCourse(courseId) {
+  return apiClient(`/courses/${courseId}`);
 }

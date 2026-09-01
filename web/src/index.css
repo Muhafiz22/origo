@@ -13,6 +13,10 @@
   themes: origo-light --default, origo-dark --prefersdark;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 /* =========================================================
    ORIGO — Light Theme
    Parchment / ink / brass
