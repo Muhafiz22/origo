@@ -40,6 +40,16 @@ func CreateCourseCollection(app core.App) *core.Collection {
 			Min:  &minPrice,
 		},
 
+		&core.AutodateField{
+			Name:     "created",
+			OnCreate: true,
+		},
+
+		&core.AutodateField{
+			Name:     "updated",
+			OnUpdate: true,
+		},
+
 		&core.RelationField{
 			Name:         "creatorId",
 			Required:     true,

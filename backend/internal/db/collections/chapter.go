@@ -33,6 +33,16 @@ func CreateChapterCollection(app core.App) *core.Collection {
 			Max:  500,
 		},
 
+		&core.AutodateField{
+			Name:     "created",
+			OnCreate: true,
+		},
+
+		&core.AutodateField{
+			Name:     "updated",
+			OnUpdate: true,
+		},
+
 		&core.RelationField{
 			Name:         "courseId",
 			Required:     true,

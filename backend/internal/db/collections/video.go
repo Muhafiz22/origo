@@ -48,7 +48,7 @@ func CreateVideoCollection(app core.App) *core.Collection {
 			Required:  true,
 			MaxSelect: 1,
 			MimeTypes: []string{
-				"image/jpg",
+				"image/jpeg",
 				"image/png",
 				"image/webp",
 			},
@@ -59,6 +59,16 @@ func CreateVideoCollection(app core.App) *core.Collection {
 			Required: true,
 			OnlyInt:  true,
 			Min:      &min,
+		},
+
+		&core.AutodateField{
+			Name:     "created",
+			OnCreate: true,
+		},
+
+		&core.AutodateField{
+			Name:     "updated",
+			OnUpdate: true,
 		},
 
 		&core.RelationField{

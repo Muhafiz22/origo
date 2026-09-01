@@ -37,6 +37,16 @@ func CreateNoteCollection(app core.App) *core.Collection {
 			Required: true,
 		},
 
+		&core.AutodateField{
+			Name:     "created",
+			OnCreate: true,
+		},
+
+		&core.AutodateField{
+			Name:     "updated",
+			OnUpdate: true,
+		},
+
 		&core.RelationField{
 			Name:         "chapter",
 			Required:     true,

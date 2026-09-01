@@ -42,6 +42,16 @@ func CreateSubscriptionCollection(app core.App) *core.Collection {
 			Name:     "enrolled_at",
 			Required: true,
 		},
+
+		&core.AutodateField{
+			Name:     "created",
+			OnCreate: true,
+		},
+
+		&core.AutodateField{
+			Name:     "updated",
+			OnUpdate: true,
+		},
 	)
 
 	return collection
