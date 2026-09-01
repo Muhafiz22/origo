@@ -88,7 +88,7 @@ func (s *Service) listChapters(courseId string) ([]ChapterResponse, error) {
 		0,
 		0,
 		dbx.Params{
-			"courseId": "courseId",
+			"courseId": courseId,
 		},
 	)
 
