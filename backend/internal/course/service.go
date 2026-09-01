@@ -2,6 +2,7 @@ package course
 
 import (
 	"backend/internal/apperr"
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
 )
 
@@ -120,4 +121,33 @@ func (s *Service) deleteCourse(courseId string, userId string) error {
 	}
 
 	return nil
+}
+
+func (s *Service) listMyCourses(userId string) ([]CourseResponse, error) {
+	allRecords, err := s.app.FindRecordsByFilter(
+		"courses",
+		"creatorId = {:userId}",
+		"-created",
+		0,
+		0,
+		dbx.Params{
+			"userId": userId,
+		},
+	)
+
+	if err != nil {
+		s.app.Logger().Error("failed to fetch courses records",
+			"userId", userId,
+			"error", err,
+		)
+		return nil, err
+	}
+
+	responses := make([]CourseResponse, 0, len(allRecords))
+
+	for _, record := range allRecords {
+		responses = append(responses, toCourseResponse(record))
+	}
+
+	return responses, nil
 }

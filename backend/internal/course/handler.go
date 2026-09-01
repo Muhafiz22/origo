@@ -99,3 +99,14 @@ func (h *Handler) deleteCourseHandler(e *core.RequestEvent) error {
 		"message": "course deleted successfully",
 	})
 }
+
+func (h *Handler) listMyCoursesHandler(e *core.RequestEvent) error {
+	userId := e.Auth.Id
+
+	responses, err := h.service.listMyCourses(userId)
+	if err != nil {
+		return apis.MapError(err)
+	}
+
+	return e.JSON(http.StatusOK, responses)
+}

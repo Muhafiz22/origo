@@ -13,8 +13,10 @@ func toCourseResponse(record *core.Record) CourseResponse {
 		CourseId:    record.Id,
 		Name:        record.GetString("name"),
 		Description: record.GetString("description"),
-		CreatedAt:   record.GetDateTime("created"),
-		UpdatedAt:   record.GetDateTime("updated"),
+		Price:       record.GetFloat("price"),
+		CreatorId:   record.GetString("creatorId"),
+		CreatedAt:   record.Collection().Created,
+		UpdatedAt:   record.Collection().Updated,
 	}
 	return response
 }
