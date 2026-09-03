@@ -18,6 +18,8 @@ func RegisterRoutes(r *pocketRouter.Router[*core.RequestEvent], h *Handler) {
 
 	r.POST("/auth/login", h.loginHandler)
 
+	r.POST("/auth/logout", h.logoutHandler)
+
 	r.POST("/auth/forgot-password", h.forgotPasswordHandler)
 
 	r.POST("/auth/reset-password", h.resetPasswordHandler)

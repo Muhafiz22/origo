@@ -12,6 +12,7 @@ import (
 	"os"
 
 	"github.com/pocketbase/pocketbase"
+	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 	"github.com/pocketbase/pocketbase/tools/osutils"
@@ -49,6 +50,14 @@ func main() {
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		fmt.Println("on serve hook executed")
 
+		se.Router.Bind(apis.CORS(apis.CORSConfig{
+			AllowOrigins:     []string{"http://localhost:5173"},
+			AllowCredentials: true,
+			AllowHeaders:     []string{"Content-Type"},
+		}))
+		fmt.Println("CORS Config hook executed")
+
+		se.Router.Bind(auth.LoadAuthCookieMiddleware())
 		router.Register(
 			se.Router,
 			router.Dependencies{

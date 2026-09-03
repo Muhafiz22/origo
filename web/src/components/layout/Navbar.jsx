@@ -3,6 +3,8 @@ import { Sun, Moon } from "lucide-react";
 import { useState, useEffect } from "react";
 
 function Navbar() {
+
+  const {user, status, logout} = useState()
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "origo-light";
   });

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"net/http"
 
-	pbApis "github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 )
 
@@ -126,7 +125,21 @@ func (h *Handler) loginHandler(e *core.RequestEvent) error {
 		return apis.MapError(err)
 	}
 
-	return pbApis.RecordAuthResponse(e, record, "password", nil)
+	token, err := record.NewStaticAuthToken(sessionDuration)
+	if err != nil {
+		return apis.MapError(err)
+	}
+
+	setSessionCookie(e, token)
+
+	return e.JSON(http.StatusOK, h.service.authenticateMe(record))
+}
+
+func (h *Handler) logoutHandler(e *core.RequestEvent) error {
+	clearSessionCookie(e)
+	return e.JSON(http.StatusOK, map[string]string{
+		"message": "logged out",
+	})
 }
 
 func (h *Handler) forgotPasswordHandler(e *core.RequestEvent) error {
