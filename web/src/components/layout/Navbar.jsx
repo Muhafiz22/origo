@@ -1,10 +1,10 @@
 import { Link } from "react-router";
 import { Sun, Moon } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 function Navbar() {
-
-  const {user, status, logout} = useState()
+  const { user, status, login, logout } = useAuth();
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "origo-light";
   });
@@ -50,19 +50,60 @@ function Navbar() {
             )}
           </button>
 
-          <Link
-            to="/login"
-            className="border border-base-300 px-4 py-2 font-body text-sm font-medium text-base-content transition-colors hover:text-primary"
-          >
-            Log in
-          </Link>
+          {status === "authenticated" ? (
+            <>
+              <Link
+                to="/dashboard"
+                className="font-body text-sm font-medium text-base-content transition-colors hover:text-primary"
+              >
+                Dashboard
+              </Link>
 
-          <Link
-            to="/signup"
-            className="border border-primary bg-primary px-4 py-2 font-body text-xs font-medium text-primary-content transition-colors hover:bg-primary/90"
-          >
-            Sign up
-          </Link>
+              <Link
+                to="/mylearning"
+                className="font-body text-sm font-medium text-base-content transition-colors hover:text-primary"
+              >
+                My Learning
+              </Link>
+
+              <div className="dropdown dropdown-end">
+                <button
+                  tabIndex={0}
+                  className="btn btn-ghost btn-circle avatar placeholder"
+                >
+                  <div className="w-8 rounded-full bg-neutral text-neutral-content">
+                    <span className="text-sm">
+                      {user?.name?.[0]?.toUpperCase() ?? "?"}
+                    </span>
+                  </div>
+                </button>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menun z-10 m-3 w-40 rounded-box bg-base-100 p-2 shadow"
+                >
+                  <li>
+                    <button onClick={logout}>Log out</button>
+                  </li>
+                </ul>
+              </div>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="border border-base-300 px-4 py-2 font-body text-sm font-medium text-base-content transition-colors hover:text-primary"
+              >
+                Log in
+              </Link>
+
+              <Link
+                to="/signup"
+                className="border border-primary bg-primary px-4 py-2 font-body text-xs font-medium text-primary-content transition-colors hover:bg-primary/90"
+              >
+                Sign up
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>

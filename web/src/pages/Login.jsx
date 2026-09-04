@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import apiClient from "../services/apiClient";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [identity, setIdentity] = useState("");
   const [password, setPassword] = useState("");
@@ -11,27 +12,17 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function handleSubmit() {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     setLoading(true);
     setError(null);
 
     try {
-      const data = await apiClient("/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          identity,
-          password,
-        }),
+      await login({
+        identity,
+        password,
       });
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.record));
-
       navigate("/");
     } catch (error) {
       setError(error);
@@ -48,7 +39,7 @@ function Login() {
           </p>
 
           <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
-          Log in
+            Log in
           </h1>
 
           <p className="mt-4 text-base leading-relaxed text-base-content/65">
@@ -57,12 +48,12 @@ function Login() {
         </div>
 
         <form
-        onSubmit={handleSubmit}
-        className="border border-base-300 bg-base-200 p-6 sm:p-8"
+          onSubmit={handleSubmit}
+          className="border border-base-300 bg-base-200 p-6 sm:p-8"
         >
           {error && (
             <div className="mb-6 border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
-            {error}
+              {error}
             </div>
           )}
 

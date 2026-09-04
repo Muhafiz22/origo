@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
 
   const checkAuth = useCallback(async () => {
     try {
-      const me = await authServices.getCurrentUSer();
+      const me = await authServices.getCurrentUser();
       setUser(me);
       setStatus("authenticated");
     } catch (error) {
@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
   }, [checkAuth]);
 
   const login = async (credentials) => {
-    await authServices.login();
+    await authServices.login(credentials);
     await checkAuth();
   };
 
@@ -38,14 +38,19 @@ export function AuthProvider({ children }) {
     setUser(null);
     setStatus("unauthenticated");
   };
+  console.log("AUTH STATE:", { user, status });
 
-  return <AuthContext.Provider>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, status, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {
-    throw new Error("useAuth must be used within AthProvider");
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return ctx;
 }
