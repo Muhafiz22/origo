@@ -2,7 +2,7 @@ package auth
 
 type UserProfileResponse struct {
 	UserId   string `json:"userId"`
-	Name     string `json:"name"`
+	Username string `json:"name"`
 	Email    string `json:"email"`
 	Verified bool   `json:"verified"`
 	Avatar   string `json:"avatar"`

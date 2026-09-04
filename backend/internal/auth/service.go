@@ -1,8 +1,10 @@
 package auth
 
 import (
+	"backend/internal/apperr"
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
@@ -22,7 +24,7 @@ func NewService(app core.App) *Service {
 func (s *Service) authenticateMe(record *core.Record) UserProfileResponse {
 	response := UserProfileResponse{
 		UserId:   record.Id,
-		Name:     record.GetString("name"),
+		Username: record.GetString("name"),
 		Email:    record.GetString("email"),
 		Verified: record.GetBool("verified"),
 		Avatar:   record.GetString("avatar"),
@@ -42,11 +44,21 @@ func (s *Service) registerUser(req RegisterRequest) (RegisterResponse, error) {
 	record.Set("email", req.Email)
 	record.SetPassword(req.Password)
 
-	err = s.app.Save(record)
-	if err != nil {
+	if err := s.app.Save(record); err != nil {
+		if joined, ok := err.(interface{ Unwrap() []error }); ok {
+			fieldErrors := make(map[string]error)
+			for _, e := range joined.Unwrap() {
+				field, msg, found := strings.Cut(e.Error(), ": ")
+				if found {
+					fieldErrors[field] = errors.New(msg)
+				} else {
+					fieldErrors["_"] = e
+				}
+			}
+			return RegisterResponse{}, apperr.FromValidationErrors(fieldErrors)
+		}
 		return RegisterResponse{}, err
 	}
-
 	result := RegisterResponse{UserId: record.Id}
 
 	if err := mails.SendRecordVerification(s.app, record); err != nil {
