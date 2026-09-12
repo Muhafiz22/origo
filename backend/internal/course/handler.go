@@ -25,6 +25,7 @@ func (h *Handler) createCourseHandler(e *core.RequestEvent) error {
 
 	var req CreateCourseRequest
 	if err := e.BindBody(&req); err != nil {
+		h.service.app.Logger().Info("BindBody Failed", "error", err)
 		return apis.MapError(err)
 	}
 

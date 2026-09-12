@@ -7,3 +7,10 @@ export function getCourses() {
 export function getCourse(courseId) {
   return apiClient(`/courses/${courseId}`);
 }
+
+export function createCourse(data) {
+  return apiClient("/courses", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
