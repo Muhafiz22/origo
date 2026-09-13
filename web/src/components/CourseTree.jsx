@@ -1,6 +1,7 @@
+import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
-function CourseTree({ chapters, onVideoSelect, selectedVideoId }) {
+function CourseTree({ chapters, onVideoSelect, selectedVideoId, mode="learner"}) {
   const [expandedChapters, setExpandedChapters] = useState(new Set());
 
   function toggleChapter(chapterId) {
@@ -19,25 +20,41 @@ function CourseTree({ chapters, onVideoSelect, selectedVideoId }) {
 
   return (
     <div>
-      {chapters.map((chapter) => {
+      {chapters.map((chapter, index) => {
         const isExpanded = expandedChapters.has(chapter.id);
 
         return (
           <article key={chapter.id}>
-            <button
-              type="button"
-              onClick={() => toggleChapter(chapter.id)}
-              aria-expanded={isExpanded}
-              className="flex w-full items-center gap-3 px-4 py-5 text-left transition-colors hover:bg-base-200/50"
-            >
-              <span className="w-4 font-mono text-xs text-accent">
-                {isExpanded ? "▼" : "▶"}
-              </span>
+            <div className="flex w-full items-center gap-3 px-4 py-5 hover:bg-base-200/50">
+              <button
+                type="button"
+                onClick={() => toggleChapter(chapter.id)}
+                aria-expanded={isExpanded}
+                className="flex flex-1 items-center gap-3 text-left transition-colors"
+              >
+                <span className="w-4 font-mono text-xs text-accent">
+                  {isExpanded ? "▼" : "▶"}
+                </span>
 
-              <span className="font-display text-lg font-semibold">
-                {chapter.title}
-              </span>
-            </button>
+                <span className="w-6 font-mono text-base-content/60">
+                  {String(index+1).padStart(2, "0")}
+                </span>
+
+                <span className="font-display text-lg font-semibold">
+                  {chapter.title}
+                </span>
+              </button>
+
+              {mode === "editor" && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm btn-square"
+                  aria-label={`Actions for ${chapter.title}`}
+                >
+                  <EllipsisHorizontalIcon className="size-6" />
+                </button>
+              )}
+            </div>
 
             {isExpanded && (
               <div className="border-t border-base-300 px-4 pb-5 pl-11">

@@ -14,3 +14,7 @@ export function createCourse(data) {
     body: JSON.stringify(data),
   });
 }
+
+export function getMyCourses() {
+  return apiClient("/courses/mine");
+}

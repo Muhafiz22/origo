@@ -1,12 +1,23 @@
 import { Link } from "react-router";
+import { PencilSquareIcon } from "@heroicons/react/24/solid";
 
-function CourseCard({course}) {
+function CourseCard({ course, variant }) {
   return (
-    <article className="card border border-base-300 bg-base-200 shadow-none transitions-colors hover:border-accent">
+    <article className="card relative border border-base-300 bg-base-200 shadow-none transitions-colors hover:border-accent">
       <div className="card-body">
         <p className="font-mono text-xs uppercase tracking-[0.15em] text-accent">
           Course
         </p>
+
+        {variant === "dashboard" && (
+          <Link
+            to={`/dashboard/courses/${course.courseId}`}
+            className="btn btn-ghost btn-sm btn-square absolute right-4 top-4"
+            aria-label="Edit course"
+          >
+            <PencilSquareIcon className="size-5"></PencilSquareIcon>
+          </Link>
+        )}
 
         <h2 className="font-display text-2xl font-semi-bold tracking-tight">
           {course.name}

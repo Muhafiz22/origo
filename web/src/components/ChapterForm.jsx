@@ -1,13 +1,22 @@
 import { useState } from "react";
-import { createCourse } from "../services/courseServices";
+import { createChapter } from "../services/chapterServices";
 
-function CourseForm() {
-  const [name, setName] = useState("");
+function ChapterForm({ courseId, onSuccess, onCancel, mode = "create" }) {
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const isCreateMode = mode === "create";
+
+  const formTitle = isCreateMode ? "Create Chapter" : "Edit Chapter";
+  const formDescription = isCreateMode
+    ? "Add the basic information for your new chapter"
+    : "Update the information for this chapter";
+
+  const submitLabel = isCreateMode ? "Create Chapter" : "Save Changes";
+  const loadingLabel = isCreateMode ? "Creating..." : "Saving Changes...";
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -17,11 +26,11 @@ function CourseForm() {
 
     try {
       const data = {
-        name,
+        title,
         description,
-        price,
       };
-      const response = await createCourse(data);
+      const response = await createChapter(courseId, data);
+      onSuccess(response);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -37,30 +46,26 @@ function CourseForm() {
       >
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold text-base-content">
-            Create Course
+            {formTitle}
           </h1>
-
-          <p className="text-sm text-base-content/60">
-            Add the basic information for your new course.
-          </p>
+          <p className="text-sm text-base-content/60">{formDescription}</p>
         </div>
 
         <div className="space-y-6">
           <div className="space-y-2">
             <label
-              htmlFor="name"
+              htmlFor="title"
               className="text-sm font-medium text-base-content"
             >
               Title
             </label>
-
             <input
-              id="name"
+              id="title"
               type="text"
-              autoComplete="name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="e.g. JavaScript Beginner to Advance"
+              autoComplete="title"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="e.g. Introduction"
               className="input input-bordered w-full"
             />
           </div>
@@ -83,25 +88,6 @@ function CourseForm() {
               className="textarea textarea-bordered w-full resize-none"
             />
           </div>
-
-          <div>
-            <label
-              htmlFor="price"
-              className="text-sm font-medium text-base-content"
-            >
-              Price
-            </label>
-
-            <input
-              id="price"
-              type="number"
-              autoComplete="price"
-              value={price}
-              onChange={(event) => setPrice(Number(event.target.value))}
-              placeholder="Set the price for your course (default zero - free)"
-              className="input input-bordered w-full"
-            />
-          </div>
         </div>
 
         {error && (
@@ -110,9 +96,21 @@ function CourseForm() {
           </div>
         )}
 
-        <div className="flex justify-end">
-          <button type="submit" disabled={loading} className="btn btn-primary">
-            {loading ? "Creating Course..." : "Create Course"}
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="btn btn-ghost hover:text-accent"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary hover:bg-primary/80"
+          >
+            {loading ?  loadingLabel  : submitLabel}
           </button>
         </div>
       </form>
@@ -120,4 +118,4 @@ function CourseForm() {
   );
 }
 
-export default CourseForm;
+export default ChapterForm;

@@ -8,7 +8,9 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import CoursesForm from "./components/CourseForm"
+import CoursesForm from "./components/CourseForm";
+import Dashboard from "./pages/Dashboard";
+import CourseWorkspace from "./pages/CourseWorkspace";
 
 function App() {
   return (
@@ -22,16 +24,34 @@ function App() {
 
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:courseId" element={<CourseDetails />} />
-          </Route>
 
-          <Route
-            path="/courses/create"
-            element={
-              <ProtectedRoute>
-                <CoursesForm />
-              </ProtectedRoute>
-            }
-          ></Route>
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            ></Route>
+
+            <Route
+              path="/dashboard/courses/:courseId"
+              element={
+                <ProtectedRoute>
+                  <CourseWorkspace />
+                </ProtectedRoute>
+              }
+            ></Route>
+
+            <Route
+              path="/courses/create"
+              element={
+                <ProtectedRoute>
+                  <CoursesForm />
+                </ProtectedRoute>
+              }
+            ></Route>
+          </Route>
         </Routes>
       </AuthProvider>
     </BrowserRouter>

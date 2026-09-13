@@ -23,7 +23,7 @@ function Home() {
 
             <Link
               to="/courses"
-              className="btn mt-9 border-none bg-primary px-6 font-mono text-sm text-primary-content hover:bg-primary/90"
+              className="btn mt-9 border-none bg-primary px-6 font-mono text-sm text-primary-content hover:bg-primary/80"
             >
               Start reading →
             </Link>
