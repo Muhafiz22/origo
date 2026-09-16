@@ -1,17 +1,24 @@
+import { useState } from "react";
 import { useParams } from "react-router";
+
 import useCourseWithChapters from "../hooks/useCourseWithChapters";
 import CourseTree from "../components/CourseTree";
 import ChapterForm from "../components/ChapterForm";
 import Modal from "../components/Modal";
-import { useState } from "react";
+import ConfirmDialog from "../components/ConfirmDialog";
+import { deleteChapter } from "../services/chapterServices";
 
 function CourseWorkspace() {
   const { courseId } = useParams();
+
   const { course, chapters, setChapters, loading, error } =
     useCourseWithChapters(courseId);
-  const [isChapterModalOpen, setIsChapterModalOpen] = useState(false);
 
-  function handleChapterCreated(newChapter){
+  const [chapterModal, setChapterModal] = useState(null);
+  const [deletingChapter, setDeletingChapter] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
+
+  function handleChapterCreated(newChapter) {
     setChapters((chapters) => [
       ...chapters,
       {
@@ -20,14 +27,58 @@ function CourseWorkspace() {
       },
     ]);
 
-    handleCloseChapterModal()
+    setChapterModal(null);
   }
 
-  function handleOpenChapterModal(){
-    setIsChapterModalOpen(true)
+  function handleChapterUpdated(updatedChapter) {
+    setChapters((chapters) =>
+      chapters.map((chapter) =>
+        chapter.id === updatedChapter.id ? updatedChapter : chapter,
+      ),
+    );
+
+    setChapterModal(null);
   }
-  function handleCloseChapterModal(){
-    setIsChapterModalOpen(false)
+
+  function handleOpenChapterModal() {
+    setChapterModal({ mode: "create" });
+  }
+
+  function handleEditingChapter(chapter) {
+    setChapterModal({
+      mode: "edit",
+      chapter,
+    });
+  }
+
+  function handleCloseChapterModal() {
+    setChapterModal(null);
+  }
+
+  function handleDeletingChapter(chapter) {
+    setDeleteError(null);
+    setDeletingChapter(chapter);
+  }
+
+  function handleCancelDeleteChapter() {
+    setDeletingChapter(null);
+    setDeleteError(null);
+  }
+
+  async function handleConfirmDeleteChapter() {
+    try {
+      await deleteChapter(deletingChapter.id);
+
+      setChapters((chapters) =>
+        chapters.filter(
+          (chapter) => chapter.id !== deletingChapter.id,
+        ),
+      );
+
+      setDeletingChapter(null);
+    } catch (error) {
+      setDeleteError(error.message);
+    }
   }
 
   if (loading) {
@@ -55,7 +106,8 @@ function CourseWorkspace() {
         </h1>
 
         <p className="mt-4 text-base-content/60">
-          The course you're looking for doesn't exist or is no longer available.
+          The course you're looking for doesn't exist or is no longer
+          available.
         </p>
       </main>
     );
@@ -77,19 +129,13 @@ function CourseWorkspace() {
     );
   }
 
-  /*
-    TODO: 
-     1. ellipsishorizontal beside course name header for edit and delete.
-  */
   return (
     <main className="mx-auto max-w-5xl px-6 py-16 lg:px-8">
       <header className="rounded-lg">
         <div className="space-y-2">
           <h1 className="text-4xl font-semibold">{course.name}</h1>
 
-          <p className="text-base-content/60">
-            {course.description}
-          </p>
+          <p className="text-base-content/60">{course.description}</p>
 
           <p className="font-mono text-sm text-base-content/60">
             {course.price === 0 ? "Free" : `₹${course.price}`}
@@ -111,16 +157,39 @@ function CourseWorkspace() {
         <CourseTree
           chapters={chapters}
           mode="editor"
+          onEditChapter={handleEditingChapter}
+          onDeleteChapter={handleDeletingChapter}
         />
       </section>
 
-      <Modal isOpen={isChapterModalOpen}>
+      <Modal
+        isOpen={chapterModal !== null}
+        onClose={handleCloseChapterModal}
+      >
         <ChapterForm
           courseId={courseId}
-          onSuccess={handleChapterCreated}
+          mode={chapterModal?.mode}
+          initialData={chapterModal?.chapter}
+          onSuccess={
+            chapterModal?.mode === "edit"
+              ? handleChapterUpdated
+              : handleChapterCreated
+          }
           onCancel={handleCloseChapterModal}
         />
       </Modal>
+
+      <ConfirmDialog
+        isOpen={deletingChapter !== null}
+        title="Delete Chapter"
+        message={
+          deletingChapter
+            ? `Delete "${deletingChapter.title}". This cannot be undone.`
+            : ""
+        }
+        onConfirm={handleConfirmDeleteChapter}
+        onCancel={handleCancelDeleteChapter}
+      />
     </main>
   );
 }

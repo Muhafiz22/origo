@@ -77,14 +77,12 @@ func (h *Handler) updateChapterHandler(e *core.RequestEvent) error {
 	userId := e.Auth.Id
 	chapterId := e.Request.PathValue("chapterId")
 
-	err := h.service.updateChapter(chapterId, userId, req)
+	response, err := h.service.updateChapter(chapterId, userId, req)
 	if err != nil {
 		return apis.MapError(err)
 	}
 
-	return e.JSON(http.StatusOK, map[string]string{
-		"message": "chapter updated successfully",
-	})
+	return e.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) deleteChapterHandler(e *core.RequestEvent) error {

@@ -1,7 +1,13 @@
-import { useState } from "react";
-import { createChapter } from "../services/chapterServices";
+import { useState, useEffect } from "react";
+import { createChapter, updateChapter } from "../services/chapterServices";
 
-function ChapterForm({ courseId, onSuccess, onCancel, mode = "create" }) {
+function ChapterForm({
+  courseId,
+  onSuccess,
+  onCancel,
+  mode = "create",
+  initialData = null,
+}) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -18,6 +24,16 @@ function ChapterForm({ courseId, onSuccess, onCancel, mode = "create" }) {
   const submitLabel = isCreateMode ? "Create Chapter" : "Save Changes";
   const loadingLabel = isCreateMode ? "Creating..." : "Saving Changes...";
 
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title);
+      setDescription(initialData.description);
+    } else {
+      setTitle("");
+      setDescription("");
+    }
+  }, [initialData]);
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -29,8 +45,14 @@ function ChapterForm({ courseId, onSuccess, onCancel, mode = "create" }) {
         title,
         description,
       };
-      const response = await createChapter(courseId, data);
-      onSuccess(response);
+
+      if (isCreateMode) {
+        const response = await createChapter(courseId, data);
+        onSuccess(response);
+      } else {
+        const response = await updateChapter(initialData.id, data);
+        onSuccess(response);
+      }
     } catch (error) {
       setError(error.message);
     } finally {
@@ -83,7 +105,7 @@ function ChapterForm({ courseId, onSuccess, onCancel, mode = "create" }) {
               autoComplete="description"
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder="Describe what students will learn in this course..."
+              placeholder="Describe what students will learn in this chapter..."
               rows={6}
               className="textarea textarea-bordered w-full resize-none"
             />
@@ -110,7 +132,7 @@ function ChapterForm({ courseId, onSuccess, onCancel, mode = "create" }) {
             disabled={loading}
             className="btn btn-primary hover:bg-primary/80"
           >
-            {loading ?  loadingLabel  : submitLabel}
+            {loading ? loadingLabel : submitLabel}
           </button>
         </div>
       </form>

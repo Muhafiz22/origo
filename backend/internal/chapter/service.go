@@ -109,20 +109,20 @@ func (s *Service) listChapters(courseId string) ([]ChapterResponse, error) {
 	return responses, nil
 }
 
-func (s *Service) updateChapter(chapterId string, userId string, req UpdateChapterRequest) error {
+func (s *Service) updateChapter(chapterId string, userId string, req UpdateChapterRequest) (ChapterResponse, error) {
 	chapterRecord, err := s.isValidChapter(chapterId)
 	if err != nil {
-		return err
+		return ChapterResponse{}, err
 	}
 
 	courseId := chapterRecord.GetString("courseId")
 	courseRecord, err := s.isValidCourse(courseId)
 	if err != nil {
-		return err
+		return ChapterResponse{}, err
 	}
 
 	if !isCourseCreator(courseRecord, userId) {
-		return apperr.ErrForbidden
+		return ChapterResponse{}, apperr.ErrForbidden
 	}
 
 	if req.Title != nil {
@@ -138,10 +138,10 @@ func (s *Service) updateChapter(chapterId string, userId string, req UpdateChapt
 			"failed to save chapter",
 			"error", err,
 		)
-		return err
+		return ChapterResponse{}, err
 	}
 
-	return nil
+	return toChapterResponse(chapterRecord), nil
 }
 
 func (s *Service) deleteChapter(chapterId string, userId string) error {

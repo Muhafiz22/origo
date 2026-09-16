@@ -10,3 +10,16 @@ export function createChapter(courseId, data) {
     body: JSON.stringify(data),
   });
 }
+
+export function updateChapter(chapterId, data) {
+  return apiClient(`/chapters/${chapterId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteChapter(chapterId) {
+  return apiClient(`/chapters/${chapterId}`, {
+    method: "DELETE",
+  });
+}

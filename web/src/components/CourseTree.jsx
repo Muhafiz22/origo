@@ -1,8 +1,9 @@
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
-function CourseTree({ chapters, onVideoSelect, selectedVideoId, mode="learner"}) {
+function CourseTree({ chapters, onVideoSelect, selectedVideoId, mode="learner", onEditChapter, onDeleteChapter}) {
   const [expandedChapters, setExpandedChapters] = useState(new Set());
+  const [openMenu, setOpenMenu] = useState(null)
 
   function toggleChapter(chapterId) {
     setExpandedChapters((current) => {
@@ -46,14 +47,45 @@ function CourseTree({ chapters, onVideoSelect, selectedVideoId, mode="learner"})
               </button>
 
               {mode === "editor" && (
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm btn-square"
-                  aria-label={`Actions for ${chapter.title}`}
-                >
-                  <EllipsisHorizontalIcon className="size-6" />
-                </button>
-              )}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenMenu(openMenu === chapter.id ? null : chapter.id)
+                    }
+                    className="btn btn-ghost btn-sm btn-square"
+                    aria-label={`Actions for ${chapter.title}`}
+                  >
+                    <EllipsisHorizontalIcon className="size-6" />
+                  </button>
+
+                  {openMenu === chapter.id && (
+                    <div className="absolute right-0 z-10 mt-1 w-32 rounded-md border border-base-300 bg-base-100 p-1 shadow-lg">
+                      <button
+                        type="button"
+                        onClick={() => {
+                        onEditChapter(chapter);
+                        setOpenMenu(null);
+                        }}
+                        className="w-full rounded px-3 py-2 text-left text-sm hover:bg-base-200"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onDeleteChapter(chapter);
+                          setOpenMenu(null);
+                        }}
+                        className="w-full rounded px-3 py-2 text-left text-sm text-error hover:bg-base-200"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )} 
             </div>
 
             {isExpanded && (
