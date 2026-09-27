@@ -13,6 +13,7 @@ type CourseResponse struct {
 	Name        string         `json:"name"`
 	Description string         `json:"description"`
 	Price       float64        `json:"price"`
+	CreatorName string         `json:"creatorName"`
 	CreatorId   string         `json:"creatorId"`
 	CreatedAt   types.DateTime `json:"createdAt"`
 	UpdatedAt   types.DateTime `json:"updatedAt"`

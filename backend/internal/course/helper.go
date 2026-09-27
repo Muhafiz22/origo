@@ -8,13 +8,27 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 )
 
-func toCourseResponse(record *core.Record) CourseResponse {
+func (s *Service) toCourseResponse(record *core.Record) CourseResponse {
+	var creatorName string
+	creatorId := record.GetString("creatorId")
+	creatorRecord, err := s.app.FindRecordById("users", creatorId)
+	if err != nil {
+		s.app.Logger().Error(
+			"failed to fetch course creator",
+			"courseId", record.Id,
+			"creatorId", creatorId,
+			"error", err,
+		)
+	} else {
+		creatorName = creatorRecord.GetString("name")
+	}
 	response := CourseResponse{
 		CourseId:    record.Id,
 		Name:        record.GetString("name"),
 		Description: record.GetString("description"),
 		Price:       record.GetFloat("price"),
-		CreatorId:   record.GetString("creatorId"),
+		CreatorId:   creatorId,
+		CreatorName: creatorName,
 		CreatedAt:   record.Collection().Created,
 		UpdatedAt:   record.Collection().Updated,
 	}

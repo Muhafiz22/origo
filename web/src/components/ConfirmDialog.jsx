@@ -30,7 +30,11 @@ function ConfirmDialog({ title, message, isOpen, onConfirm, onCancel }) {
         <p className="mt-2 text-base-content/70">{message}</p>
 
         <div className="modal-action">
-          <button type="button" className="btn" onClick={onCancel}>
+          <button
+            type="button"
+            className="btn btn-ghost hover:text-accent"
+            onClick={onCancel}
+          >
             Cancel
           </button>
 

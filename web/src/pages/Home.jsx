@@ -1,7 +1,28 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import OrigoStamp from "../components/ui/origoStamp";
+import CourseCard from "../components/CourseCard";
+import { getCourses } from "../services/courseServices";
 
 function Home() {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadCourses() {
+      try {
+        const data = await getCourses();
+        setCourses(data.slice(0, 3));
+      } catch (error) {
+        console.error("Failed to load courses:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadCourses();
+  }, []);
+
   return (
     <main>
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-28">
@@ -10,6 +31,7 @@ function Home() {
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
               A place to begin
             </p>
+
             <h1 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-8xl">
               Learn to build,
               <br />
@@ -32,11 +54,11 @@ function Home() {
           <div className="flex flex-col items-center">
             <OrigoStamp size={240} className="h-auto w-44 sm:w-52 lg:w-60" />
 
-            <span className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-base-content/60">
+            <span className="mt-3 font-mono text-[14px] uppercase tracking-[0.3em] text-base-content/60">
               Iqra — Read
             </span>
           </div>
-        </div>{" "}
+        </div>
       </section>
 
       <section className="border-y border-base-300">
@@ -61,88 +83,17 @@ function Home() {
           </div>
 
           <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            <article className="card border border-base-300 bg-base-200 shadow-none transition-colors hover:border-accent">
-              <div className="card-body">
-                <p className="font-mono text-xs text-accent">
-                  01 / FOUNDATIONS
-                </p>
-
-                <h3 className="mt-2 font-display text-2xl font-semibold">
-                  JavaScript
-                </h3>
-
-                <p className="mt-2 text-base-content/65">
-                  Understand the language beneath the frameworks and build a
-                  foundation you can actually rely on.
-                </p>
-
-                <div className="card-actions mt-5">
-                  <Link
-                    to="/courses"
-                    className="font-mono text-xs text-base-content/60 transition-colors hover:text-base-content"
-                  >
-                    Begin course →
-                  </Link>
-                </div>
-              </div>
-            </article>
-
-            <article className="card border border-base-300 bg-base-200 shadow-none transition-colors hover:border-accent">
-              <div className="card-body">
-                <p className="font-mono text-xs text-accent">02 / BUILDING</p>
-
-                <h3 className="mt-2 font-display text-2xl font-semibold">
-                  React
-                </h3>
-
-                <p className="mt-2 text-base-content/65">
-                  Move from individual concepts to building interfaces with
-                  components, state, and real application structure.
-                </p>
-
-                <div className="card-actions mt-5">
-                  <Link
-                    to="/courses"
-                    className="font-mono text-xs text-base-content/60 transition-colors hover:text-base-content"
-                  >
-                    Begin course →
-                  </Link>
-                </div>
-              </div>
-            </article>
-
-            <article className="card border border-base-300 bg-base-200 shadow-none transition-colors hover:border-accent">
-              <div className="card-body">
-                <p className="font-mono text-xs text-accent">03 / PRACTICE</p>
-
-                <h3 className="mt-2 font-display text-2xl font-semibold">
-                  Build Something
-                </h3>
-
-                <p className="mt-2 text-base-content/65">
-                  Put the pieces together through practical work and leave with
-                  something that exists outside the lesson.
-                </p>
-
-                <div className="card-actions mt-5">
-                  <Link
-                    to="/courses"
-                    className="font-mono text-xs text-base-content/60 transition-colors hover:text-base-content"
-                  >
-                    Begin course →
-                  </Link>
-                </div>
-              </div>
-            </article>
+            {loading ? (
+              <p className="font-mono text-xs text-base-content/50">
+                Loading courses...
+              </p>
+            ) : (
+              courses.map((course) => (
+                <CourseCard key={course.courseId} course={course} />
+              ))
+            )}
           </div>
-
-          <Link
-            to="/courses"
-            className="mt-8 block font-mono text-sm text-base-content/60 transition-colors hover:text-base-content sm:hidden"
-          >
-            View all courses →
-          </Link>
-        </div>
+         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">

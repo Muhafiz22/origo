@@ -79,13 +79,12 @@ func (h *Handler) updateCourseHandler(e *core.RequestEvent) error {
 	userId := e.Auth.Id
 	courseId := e.Request.PathValue("courseId")
 
-	if err := h.service.updateCourse(courseId, userId, req); err != nil {
+	response, err := h.service.updateCourse(courseId, userId, req)
+	if err != nil {
 		return apis.MapError(err)
 	}
 
-	return e.JSON(http.StatusOK, map[string]string{
-		"message": "course details updated successfully",
-	})
+	return e.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) deleteCourseHandler(e *core.RequestEvent) error {

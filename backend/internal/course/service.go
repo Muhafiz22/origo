@@ -40,7 +40,7 @@ func (s *Service) createCourse(userId string, req CreateCourseRequest) (CourseRe
 		return CourseResponse{}, err
 	}
 
-	return toCourseResponse(record), nil
+	return s.toCourseResponse(record), nil
 }
 
 func (s *Service) listCourses() ([]CourseResponse, error) {
@@ -56,7 +56,7 @@ func (s *Service) listCourses() ([]CourseResponse, error) {
 	responses := make([]CourseResponse, 0, len(records))
 
 	for _, record := range records {
-		responses = append(responses, toCourseResponse(record))
+		responses = append(responses, s.toCourseResponse(record))
 	}
 
 	return responses, nil
@@ -68,17 +68,17 @@ func (s *Service) getCourse(courseId string) (CourseResponse, error) {
 		return CourseResponse{}, err
 	}
 
-	return toCourseResponse(courseRecord), nil
+	return s.toCourseResponse(courseRecord), nil
 }
 
-func (s *Service) updateCourse(courseId string, userId string, req UpdateCourseRequest) error {
+func (s *Service) updateCourse(courseId string, userId string, req UpdateCourseRequest) (CourseResponse, error) {
 	courseRecord, err := s.isValidCourse(courseId)
 	if err != nil {
-		return err
+		return CourseResponse{}, err
 	}
 
 	if !s.isCourseCreator(courseRecord, userId) {
-		return apperr.ErrForbidden
+		return CourseResponse{}, apperr.ErrForbidden
 	}
 
 	if req.Name != nil {
@@ -97,10 +97,10 @@ func (s *Service) updateCourse(courseId string, userId string, req UpdateCourseR
 			"failed to save course updating",
 			"error", err,
 		)
-		return err
+		return CourseResponse{}, err
 	}
 
-	return nil
+	return s.toCourseResponse(courseRecord), nil
 }
 
 func (s *Service) deleteCourse(courseId string, userId string) error {
@@ -146,7 +146,7 @@ func (s *Service) listMyCourses(userId string) ([]CourseResponse, error) {
 	responses := make([]CourseResponse, 0, len(allRecords))
 
 	for _, record := range allRecords {
-		responses = append(responses, toCourseResponse(record))
+		responses = append(responses, s.toCourseResponse(record))
 	}
 
 	return responses, nil

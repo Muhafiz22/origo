@@ -24,7 +24,7 @@ html {
 
 @plugin "daisyui/theme" {
   name: "origo-light";
-  default: true;
+  default: false;
   prefersdark: false;
   color-scheme: light;
 
@@ -41,9 +41,9 @@ html {
   --color-secondary: #3b3f2f;
   --color-secondary-content: #ede0c8;
 
-  /* Signature brass */
-  --color-accent: #c89b4a;
-  --color-accent-content: #3e2b20;
+  /* Signature moss */
+  --color-accent: #836d58;
+  --color-accent-content: #f4e9d0;
 
   /* Utility */
   --color-neutral: #2c2e30;
@@ -79,7 +79,7 @@ html {
 
 @plugin "daisyui/theme" {
   name: "origo-dark";
-  default: false;
+  default: true;
   prefersdark: true;
   color-scheme: dark;
 
@@ -94,11 +94,11 @@ html {
   --color-primary-content: #1b1712;
 
   /* Book leather / structural warmth */
-  --color-secondary: #4b3b2a;
+  --color-secondary: #a6642d;
   --color-secondary-content: #ede0c8;
 
   /* Gilded emphasis */
-  --color-accent: #d2aa5c;
+  --color-accent: #9a826c;
   --color-accent-content: #1b1712;
 
   /* Utility */

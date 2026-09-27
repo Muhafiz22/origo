@@ -3,10 +3,11 @@ import { createChapter, updateChapter } from "../services/chapterServices";
 
 function ChapterForm({
   courseId,
-  onSuccess,
-  onCancel,
   mode = "create",
   initialData = null,
+  onSuccess,
+  onCancel,
+  isOpen,
 }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -24,15 +25,12 @@ function ChapterForm({
   const submitLabel = isCreateMode ? "Create Chapter" : "Save Changes";
   const loadingLabel = isCreateMode ? "Creating..." : "Saving Changes...";
 
-  useEffect(() => {
-    if (initialData) {
-      setTitle(initialData.title);
-      setDescription(initialData.description);
-    } else {
-      setTitle("");
-      setDescription("");
-    }
-  }, [initialData]);
+useEffect(() => {
+    if(!isOpen) return;
+  setTitle(initialData?.title ?? "");
+  setDescription(initialData?.description ?? "");
+  setError(null);
+}, [isOpen, initialData]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -51,7 +49,7 @@ function ChapterForm({
         onSuccess(response);
       } else {
         const response = await updateChapter(initialData.id, data);
-        onSuccess(response);
+        onSuccess?.(response);
       }
     } catch (error) {
       setError(error.message);

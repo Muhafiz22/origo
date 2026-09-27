@@ -52,7 +52,7 @@ function useCourseWithChapters(courseId){
     };
   }, [courseId]);
 
-  return {course, chapters, setChapters, loading, error}
+  return {course, setCourse, chapters, setChapters, loading, error}
 }
 
 export default useCourseWithChapters;

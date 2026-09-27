@@ -1,22 +1,63 @@
 import { useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 
 import useCourseWithChapters from "../hooks/useCourseWithChapters";
+import CourseForm from "../components/CourseForm";
 import CourseTree from "../components/CourseTree";
 import ChapterForm from "../components/ChapterForm";
 import Modal from "../components/Modal";
 import ConfirmDialog from "../components/ConfirmDialog";
+import ActionMenu from "../components/ActionMenu.jsx";
 import { deleteChapter } from "../services/chapterServices";
+import {deleteCourse} from "../services/courseServices"
 
 function CourseWorkspace() {
   const { courseId } = useParams();
 
-  const { course, chapters, setChapters, loading, error } =
+  const { course, setCourse, chapters, setChapters, loading, error } =
     useCourseWithChapters(courseId);
+
+  const [courseModal, setCourseModal] = useState(null);
+  const [deletingCourse, setDeletingCourse] = useState(null)
 
   const [chapterModal, setChapterModal] = useState(null);
   const [deletingChapter, setDeletingChapter] = useState(null);
   const [deleteError, setDeleteError] = useState(null);
+
+  const navigate = useNavigate()
+
+  function handleEditingCourse() {
+    setCourseModal({
+      mode: "edit",
+      course,
+    });
+  }
+
+  function handleCourseUpdated(updatedCourse) {
+    setCourse(updatedCourse);
+    setCourseModal(null);
+}
+
+  function handleDeletingCourse(course){
+    setDeletingCourse(course)
+    setDeleteError(null)
+  }
+
+  function handleCancelDeleteCourse(){
+    setDeletingCourse(null)
+    setDeleteError(null)
+  }
+
+  async function handleConfirmDeleteCourse(){
+    try{
+      await deleteCourse(deletingCourse.courseId)
+      
+      navigate("/dashboard")
+      setDeletingCourse(null)
+    }catch(error){
+      setDeleteError(error.message)
+    }
+  }
 
   function handleChapterCreated(newChapter) {
     setChapters((chapters) => [
@@ -70,9 +111,7 @@ function CourseWorkspace() {
       await deleteChapter(deletingChapter.id);
 
       setChapters((chapters) =>
-        chapters.filter(
-          (chapter) => chapter.id !== deletingChapter.id,
-        ),
+        chapters.filter((chapter) => chapter.id !== deletingChapter.id),
       );
 
       setDeletingChapter(null);
@@ -106,8 +145,7 @@ function CourseWorkspace() {
         </h1>
 
         <p className="mt-4 text-base-content/60">
-          The course you're looking for doesn't exist or is no longer
-          available.
+          The course you're looking for doesn't exist or is no longer available.
         </p>
       </main>
     );
@@ -133,13 +171,47 @@ function CourseWorkspace() {
     <main className="mx-auto max-w-5xl px-6 py-16 lg:px-8">
       <header className="rounded-lg">
         <div className="space-y-2">
-          <h1 className="text-4xl font-semibold">{course.name}</h1>
-
+          <div className="flex items-center gap-8">
+            <h1 className="mt-4 max-w-4xl font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+          {course.name}
+        </h1>            <ActionMenu
+              label={`Action for ${course.name}`}
+              onEdit={handleEditingCourse}
+              onDelete={() => handleDeletingCourse(course)}
+            />
+          </div>
+          
           <p className="text-base-content/60">{course.description}</p>
 
           <p className="font-mono text-sm text-base-content/60">
             {course.price === 0 ? "Free" : `₹${course.price}`}
           </p>
+
+          <Modal
+            isOpen={courseModal !== null}
+            onClose={() => setCourseModal(null)}
+          >
+            {courseModal && (
+              <CourseForm
+                mode={courseModal?.mode}
+                initialData={courseModal?.course}
+                onSuccess={handleCourseUpdated}
+                onCancel={() => setCourseModal(null)}
+              />
+            )}
+          </Modal>
+
+          <ConfirmDialog 
+            isOpen={deletingCourse !== null}
+            title={"Delete Course"} 
+            message={
+              deletingCourse
+              ? `Delete '${course.name}'. This cannot be undone. All the related content will be deleted.`
+              : ""
+            }
+            onConfirm={handleConfirmDeleteCourse}
+            onCancel={handleCancelDeleteCourse}
+          />
         </div>
 
         <div className="mt-6 flex justify-end">
@@ -166,17 +238,20 @@ function CourseWorkspace() {
         isOpen={chapterModal !== null}
         onClose={handleCloseChapterModal}
       >
-        <ChapterForm
-          courseId={courseId}
-          mode={chapterModal?.mode}
-          initialData={chapterModal?.chapter}
-          onSuccess={
-            chapterModal?.mode === "edit"
-              ? handleChapterUpdated
-              : handleChapterCreated
-          }
-          onCancel={handleCloseChapterModal}
-        />
+        {chapterModal && (
+          <ChapterForm
+            courseId={courseId}
+            mode={chapterModal?.mode}
+            initialData={chapterModal?.chapter ?? null}
+            isOpen={chapterModal !== null}
+            onSuccess={
+              chapterModal?.mode === "edit"
+                ? handleChapterUpdated
+                : handleChapterCreated
+            }
+            onCancel={handleCloseChapterModal}
+          />
+        )}
       </Modal>
 
       <ConfirmDialog

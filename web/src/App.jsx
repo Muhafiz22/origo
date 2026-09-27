@@ -8,9 +8,9 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import CoursesForm from "./components/CourseForm";
 import Dashboard from "./pages/Dashboard";
 import CourseWorkspace from "./pages/CourseWorkspace";
+import { CreateCourse } from "./components/CreateCourse";
 
 function App() {
   return (
@@ -47,7 +47,7 @@ function App() {
               path="/courses/create"
               element={
                 <ProtectedRoute>
-                  <CoursesForm />
+                  <CreateCourse />
                 </ProtectedRoute>
               }
             ></Route>

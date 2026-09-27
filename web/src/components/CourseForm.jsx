@@ -1,13 +1,39 @@
-import { useState } from "react";
-import { createCourse } from "../services/courseServices";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { createCourse, updateCourse } from "../services/courseServices";
 
-function CourseForm() {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState(0);
+function CourseForm({
+  mode="create",
+  initialData = null,
+  onSuccess,
+  onCancel,
+}) {
+  const [name, setName] = useState(initialData?.name?? "")
+  const [description, setDescription] = useState(initialData?.description?? "");
+  const [price, setPrice] = useState(initialData?.price?? 0);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+
+  const isCreateMode = mode === "create"
+  
+  const heading = isCreateMode ? "Create Course" : "Edit Course"
+  const formDescription = isCreateMode 
+  ? " Add the basic information for your new course."
+  : "Edit the course informations"
+
+  const submitLabel = isCreateMode ? "Create Course" : "Save Changes"
+  const loadingLabel = isCreateMode ? "Creating Course" : "Saving Changes"
+
+
+  useEffect(() => {
+    setName(initialData?.name?? "")
+    setDescription(initialData?.description??"")
+    setPrice(initialData?.price?? 0)
+    setError(null)
+  }, [initialData])
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -21,7 +47,16 @@ function CourseForm() {
         description,
         price,
       };
-      const response = await createCourse(data);
+      const response = 
+        mode === "create"
+        ? await createCourse(data)
+        : await updateCourse(initialData.courseId, data)
+      
+      onSuccess?.(response)
+
+      if(mode === "create"){
+        navigate("/dashboard")
+      }
     } catch (error) {
       setError(error.message);
     } finally {
@@ -37,11 +72,11 @@ function CourseForm() {
       >
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold text-base-content">
-            Create Course
+            {heading}
           </h1>
 
           <p className="text-sm text-base-content/60">
-            Add the basic information for your new course.
+           {formDescription}
           </p>
         </div>
 
@@ -110,9 +145,20 @@ function CourseForm() {
           </div>
         )}
 
-        <div className="flex justify-end">
-          <button type="submit" disabled={loading} className="btn btn-primary">
-            {loading ? "Creating Course..." : "Create Course"}
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="btn btn-ghost hover:text-accent"
+          >
+            Cancel
+          </button>
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="btn btn-primary hover:bg-primary/80">
+            {loading ? loadingLabel : submitLabel}
           </button>
         </div>
       </form>
