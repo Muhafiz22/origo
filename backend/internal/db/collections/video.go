@@ -38,6 +38,7 @@ func CreateVideoCollection(app core.App) *core.Collection {
 			Name:      "video",
 			Required:  true,
 			MaxSelect: 1,
+			MaxSize:   100 * 1024 * 1024,
 			MimeTypes: []string{
 				"video/mp4",
 			},
