@@ -121,13 +121,14 @@ useEffect(() => {
             type="button"
             onClick={onCancel}
             className="btn btn-ghost hover:text-accent"
+            disabled={loading}
           >
             Cancel
           </button>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || mode === "create" && (!title || !description)}
             className="btn btn-primary hover:bg-primary/80"
           >
             {loading ? loadingLabel : submitLabel}
