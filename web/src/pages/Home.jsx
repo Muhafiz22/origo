@@ -29,13 +29,13 @@ function Home() {
         <div className="grid items-center gap-16 lg:grid-cols-[1fr_auto]">
           <div className="max-w-3xl">
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
-              A place to begin
+              SEEK · LEARN · BECOME
             </p>
 
             <h1 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-8xl">
-              Learn to build,
+              Every craft begins,
               <br />
-              not just watch.
+              with a single page.
             </h1>
 
             <p className="mt-7 max-w-2xl text-lg leading-relaxed text-base-content/70 sm:text-xl">

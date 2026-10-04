@@ -296,7 +296,6 @@ function VideoForm({
           </button>
         </div>
       </form>
-    )
     </div>
   );
 }
