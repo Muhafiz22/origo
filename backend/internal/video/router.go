@@ -11,7 +11,7 @@ func RegisterRoutes(r *pocketRouter.Router[*core.RequestEvent], h *Handler) {
 	videos := r.Group("/videos")
 
 	chapters.POST("/{chapterId}/videos", h.createVideoHandler).Bind(apis.RequireAuth("users"))
-	chapters.GET("/{chapterId}/videos", h.listVideosHandler)
+	chapters.GET("/{chapterId}/videos", h.getChapterVideosHandler)
 
 	videos.GET("/{videoId}", h.getVideoMetadataHandler)
 	videos.PATCH("/{videoId}", h.updateVideoHandler).Bind(apis.RequireAuth("users"))

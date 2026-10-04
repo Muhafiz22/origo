@@ -172,7 +172,7 @@ func (s *Service) deleteVideo(userId string, videoId string) error {
 	return nil
 }
 
-func (s *Service) listVideos(chapterId string) ([]VideoMetadataResponse, error) {
+func (s *Service) getChapterVideos(chapterId string) ([]VideoMetadataResponse, error) {
 	allRecords, err := s.app.FindRecordsByFilter(
 		"videos",
 		"chapterId = {:chapterId}",
@@ -186,18 +186,18 @@ func (s *Service) listVideos(chapterId string) ([]VideoMetadataResponse, error) 
 
 	if err != nil {
 		s.app.Logger().Error(
-			"failed to fetch videos record",
+			"failed to get videos record",
 			"chapterId", chapterId,
 			"error", err,
 		)
 		return nil, err
 	}
 
-	responses := make([]VideoMetadataResponse, 0, len(allRecords))
+	response := make([]VideoMetadataResponse, 0, len(allRecords))
 
 	for _, record := range allRecords {
-		responses = append(responses, toVideoMetadataResponse(record))
+		response = append(response, toVideoMetadataResponse(record))
 	}
 
-	return responses, nil
+	return response, nil
 }

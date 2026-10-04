@@ -138,13 +138,13 @@ func (h *Handler) deleteVideoHandler(e *core.RequestEvent) error {
 	})
 }
 
-func (h *Handler) listVideosHandler(e *core.RequestEvent) error {
+func (h *Handler) getChapterVideosHandler(e *core.RequestEvent) error {
 	chapterId := e.Request.PathValue("chapterId")
 
-	responses, err := h.service.listVideos(chapterId)
+	response, err := h.service.getChapterVideos(chapterId)
 	if err != nil {
 		return apis.MapError(err)
 	}
 
-	return e.JSON(http.StatusOK, responses)
+	return e.JSON(http.StatusOK, response)
 }
