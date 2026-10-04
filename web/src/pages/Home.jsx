@@ -39,8 +39,8 @@ function Home() {
             </h1>
 
             <p className="mt-7 max-w-2xl text-lg leading-relaxed text-base-content/70 sm:text-xl">
-              Course-length screencasts, real projects, and notes that stay
-              attached to the moment you took them.
+              A single place to bring your learning together and make sense of it.
+              Study with structure, keep your progress, and return whenever you need.
             </p>
 
             <Link
@@ -99,55 +99,42 @@ function Home() {
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
         <div className="grid gap-12 md:grid-cols-3">
           <div>
-            <span className="font-mono text-xs text-accent">STRUCTURE</span>
+            <span className="font-mono text-xs text-accent">ARCHIVES</span>
 
             <h2 className="mt-4 font-display text-2xl font-semibold">
-              Learn with structure.
+              Everything in one place.
             </h2>
 
             <p className="mt-3 leading-relaxed text-base-content/65">
-              Courses are broken into chapters so you always know where you are
-              and what comes next.
+              A collection of courses and learning materials, gathered in one place for easy study and reference.
             </p>
           </div>
 
           <div>
-            <span className="font-mono text-xs text-accent">PRACTICE</span>
+            <span className="font-mono text-xs text-accent">DIRECTION</span>
 
             <h2 className="mt-4 font-display text-2xl font-semibold">
-              Build as you learn.
+              Know where you're going.
             </h2>
 
             <p className="mt-3 leading-relaxed text-base-content/65">
-              Concepts become useful when you put them into practice. Origo
-              keeps the focus on making things.
+              Move through courses and chapters with a clear sense of what's covered and what comes next.
             </p>
           </div>
 
           <div>
-            <span className="font-mono text-xs text-accent">PROGRESS</span>
+            <span className="font-mono text-xs text-accent">RECORD</span>
 
             <h2 className="mt-4 font-display text-2xl font-semibold">
-              Keep your progress.
+              Keep what you've learned.
             </h2>
 
             <p className="mt-3 leading-relaxed text-base-content/65">
-              Your course and chapter progress gives you a visible record of how
-              far you've travelled.
+              Notes and progress form a lasting record of learning, always there to revisit and continue from.
             </p>
           </div>
         </div>
       </section>
-
-      <footer className="border-t border-base-300">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-8 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-          <p className="font-display text-lg font-semibold">Origo</p>
-
-          <p className="font-mono text-xs text-base-content/45">
-            Learn. Build. Continue.
-          </p>
-        </div>
-      </footer>
     </main>
   );
 }

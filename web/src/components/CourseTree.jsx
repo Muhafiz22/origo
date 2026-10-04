@@ -1,5 +1,5 @@
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function CourseTree({
   chapters,
@@ -28,6 +28,26 @@ function CourseTree({
       return next;
     });
   }
+
+  useEffect(() => {
+    if(!selectedVideoId){
+      return;
+    }
+
+    const chapter = chapters.find((chapter) => 
+      (chapter.videos?? []).some((video) => video.id === selectedVideoId),
+    );
+
+    if(!chapter){
+      return
+    }
+
+    setExpandedChapters((current) => {
+      const next = new Set(current)
+      next.add(chapter.id)
+      return next
+    });
+  }, [selectedVideoId, chapters]);
 
   return (
     <div>
@@ -105,11 +125,13 @@ function CourseTree({
 
             {isExpanded && (
               <div className="border-t border-base-300 px-4 pb-5 pl-11">
-                <p className="py-4 text-sm leading-relaxed text-base-content/70">
-                  {chapter.description}
-                </p>
-
-                <div className="space-y-1">
+                {mode === "editor" && (
+                  <p className="py-4 text-sm leading-relaxed text-base-content/70">
+                    {chapter.description}
+                  </p>
+                )}
+                
+                <div className="space-y-1 mt-2">
                   {mode === "editor" && (chapter.videos ?? []).length === 0 && (
                     <p className="px-3 py-2 text-sm text-base-content/50">
                       No Videos yet
