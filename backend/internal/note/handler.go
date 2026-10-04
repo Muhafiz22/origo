@@ -125,3 +125,14 @@ func (h *Handler) deleteNoteHandler(e *core.RequestEvent) error {
 		"message": "note deleted successfully",
 	})
 }
+
+func (h *Handler) getChapterNotesHandler(e *core.RequestEvent) error {
+	chapterId := e.Request.PathValue("chapterId")
+
+	response, err := h.service.getChapterNotes(chapterId)
+	if err != nil {
+		return apis.MapError(err)
+	}
+
+	return e.JSON(http.StatusOK, response)
+}

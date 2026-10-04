@@ -7,12 +7,17 @@ import (
 )
 
 func RegisterRoutes(r *pocketRouter.Router[*core.RequestEvent], h *Handler) {
-	r.POST("chapters/{chapterId}/notes", h.createNoteHandler).Bind(apis.RequireAuth("users"))
+	chapters := r.Group("/chapters")
+	notes := r.Group("/notes")
 
-	r.PATCH("notes/{noteId}", h.updateNoteHandler).Bind(apis.RequireAuth("users"))
+	chapters.POST("/{chapterId}/notes", h.createNoteHandler).Bind(apis.RequireAuth("users"))
 
-	r.DELETE("notes/{noteId}", h.deleteNoteHandler).Bind(apis.RequireAuth("users"))
+	chapters.GET("/{chapterId}/notes", h.getChapterNotesHandler)
 
-	r.GET("notes/{noteId}", h.getNoteMetadataHandler)
-	r.GET("notes/{noteId}/content", h.getNoteContentHandler).Bind(apis.RequireAuth("users"))
+	notes.PATCH("/{noteId}", h.updateNoteHandler).Bind(apis.RequireAuth("users"))
+
+	notes.DELETE("/{noteId}", h.deleteNoteHandler).Bind(apis.RequireAuth("users"))
+
+	notes.GET("/{noteId}", h.getNoteMetadataHandler)
+	notes.GET("/{noteId}/content", h.getNoteContentHandler).Bind(apis.RequireAuth("users"))
 }

@@ -2,6 +2,8 @@ package note
 
 import (
 	"backend/internal/apperr"
+
+	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tools/filesystem"
 )
@@ -162,4 +164,34 @@ func (s *Service) deleteNote(userId string, noteId string) error {
 	}
 
 	return nil
+}
+
+func (s *Service) getChapterNotes(chapterId string) ([]NoteMetadataResponse, error) {
+	allRecords, err := s.app.FindRecordsByFilter(
+		"notes",
+		"chapterId = {:chapterId}",
+		"created",
+		0,
+		0,
+		dbx.Params{
+			"chapterId": chapterId,
+		},
+	)
+
+	if err != nil {
+		s.app.Logger().Error(
+			"failed to get notes record",
+			"chapterId", chapterId,
+			"error", err,
+		)
+		return nil, err
+	}
+
+	response := make([]NoteMetadataResponse, 0, len(allRecords))
+
+	for _, record := range allRecords {
+		response = append(response, toNoteMetadataResponse(record))
+	}
+
+	return response, nil
 }
