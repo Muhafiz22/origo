@@ -5,6 +5,7 @@ import (
 	"backend/internal/chapter"
 	"backend/internal/course"
 	"backend/internal/health"
+	"backend/internal/note"
 	"backend/internal/user"
 	"backend/internal/video"
 
@@ -18,6 +19,7 @@ type Dependencies struct {
 	Course  *course.Handler
 	Chapter *chapter.Handler
 	Video   *video.Handler
+	Note    *note.Handler
 }
 
 func Register(r *pocketRouter.Router[*core.RequestEvent], d Dependencies) {
@@ -29,4 +31,5 @@ func Register(r *pocketRouter.Router[*core.RequestEvent], d Dependencies) {
 	course.RegisterRoutes(r, d.Course)
 	chapter.RegisterRoutes(r, d.Chapter)
 	video.RegisterRoutes(r, d.Video)
+	note.RegisterRoutes(r, d.Note)
 }

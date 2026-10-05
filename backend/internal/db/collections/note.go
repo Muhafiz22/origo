@@ -48,7 +48,7 @@ func CreateNoteCollection(app core.App) *core.Collection {
 		},
 
 		&core.RelationField{
-			Name:         "chapter",
+			Name:         "chapterId",
 			Required:     true,
 			CollectionId: chapters.Id,
 			MaxSelect:    1,

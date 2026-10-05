@@ -5,6 +5,7 @@ import (
 	"backend/internal/chapter"
 	"backend/internal/course"
 	_ "backend/internal/db/migrations"
+	"backend/internal/note"
 	"backend/internal/router"
 	"backend/internal/user"
 	"backend/internal/video"
@@ -47,6 +48,9 @@ func main() {
 	videoService := video.NewService(app)
 	videoHandler := video.NewHandler(videoService)
 
+	noteService := note.NewService(app)
+	noteHandler := note.NewHandler(noteService)
+
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		fmt.Println("on serve hook executed")
 
@@ -66,6 +70,7 @@ func main() {
 				Course:  courseHandler,
 				Chapter: chapterHandler,
 				Video:   videoHandler,
+				Note:    noteHandler,
 			},
 		)
 
