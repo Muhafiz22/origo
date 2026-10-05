@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { getCourse } from "../services/courseServices"; 
+import { getCourse } from "../services/courseServices";
 import { getChapters } from "../services/chapterServices";
 import { getVideos } from "../services/videoServices";
+import { getNotes } from "../services/noteServices";
 
-
-function useCourseWithChapters(courseId){
+function useCourseWithChapters(courseId) {
   const [course, setCourse] = useState(null);
   const [chapters, setChapters] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,17 +23,25 @@ function useCourseWithChapters(courseId){
           getChapters(courseId),
         ]);
 
-        const chaptersWithVideos = await Promise.all(
-          fetchedChapters.map(async (chapter) => ({
-            ...chapter,
-            videos: await getVideos(chapter.id),
-          })),
+        const chaptersWithVideosAndNotes = await Promise.all(
+          fetchedChapters.map(async (chapter) => {
+            const [videos, notes] = await Promise.all([
+              getVideos(chapter.id),
+              getNotes(chapter.id),
+            ]);
+
+            return {
+              ...chapter,
+              videos,
+              notes,
+            };
+          }),
         );
 
         if (ignore) return;
 
         setCourse(courseData);
-        setChapters(chaptersWithVideos);
+        setChapters(chaptersWithVideosAndNotes);
       } catch (error) {
         if (!ignore) {
           setError(error);
@@ -52,7 +60,7 @@ function useCourseWithChapters(courseId){
     };
   }, [courseId]);
 
-  return {course, setCourse, chapters, setChapters, loading, error}
+  return { course, setCourse, chapters, setChapters, loading, error };
 }
 
 export default useCourseWithChapters;

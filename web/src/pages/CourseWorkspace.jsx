@@ -32,6 +32,9 @@ function CourseWorkspace() {
   const [videoModal, setVideoModal] = useState(null);
   const [deletingVideo, setDeletingVideo] = useState(null);
 
+  const [noteModal, setNoteModal] = useState(null)
+  const [deletingNote, setDeletingNote] = useState(null)
+
   const navigate = useNavigate();
 
   function handleEditCourse() {
@@ -145,7 +148,15 @@ function CourseWorkspace() {
     })
   }
 
-  function handleVideoSuccess(updatedVideo) {
+  function handleDeleteVideo(chapter, video){
+    setDeleteError(null)
+    setDeletingVideo({
+      chapter,
+      video,
+    });
+  }
+
+  function handleVideoSuccess(newVideo) {
     const chapterId = videoModal.chapter.id;
 
     setChapters((chapters) =>
@@ -157,29 +168,21 @@ function CourseWorkspace() {
         if (videoModal.mode === "create") {
           return {
             ...chapter,
-            videos: [...(chapter.videos ?? []), updatedVideo],
+            videos: [...(chapter.videos ?? []), newVideo],
           };
         }
 
         return {
           ...chapter,
           videos: (chapter.videos ?? []).map((video) =>
-            video.id === updatedVideo.id
-              ? { ...video, ...updatedVideo }
+            video.id === newVideo.id
+              ? { ...video, ...newVideo }
               : video
           ),
           };
         }),
       );
     setVideoModal(null);
-  }
-
-  function handleDeleteVideo(chapter, video){
-    setDeleteError(null)
-    setDeletingVideo({
-      chapter,
-      video,
-    });
   }
 
   async function handleConfirmDeleteVideo(){
@@ -212,6 +215,33 @@ function CourseWorkspace() {
 
   function handleCloseVideoModal() {
     setVideoModal(null);
+  }
+
+  function handleAddNote(chapter){
+    setNoteModal({
+      mode: "create",
+      chapter,
+    });
+  }
+
+  function handleEditNote(chapter, note){
+    setNoteModal({
+      mode: "edit",
+      chapter,
+      note,
+    });
+  }
+
+  function handleDeleteNote(chapter, note){
+    setDeleteError(null)
+    setDeletingNote({
+      chapter,
+      note,
+    });
+  }
+
+  function handleNoteSuccess(newNote){
+
   }
 
   if (loading) {
@@ -329,6 +359,9 @@ function CourseWorkspace() {
           onAddVideo={handleAddVideo}
           onEditVideo={handleEditVideo}
           onDeleteVideo={handleDeleteVideo}
+          onAddNote={handleAddNote}
+          onEditNote={handleEditNote}
+          onDeleteNote={handleDeleteNote}
         />
       </section>
 

@@ -9,10 +9,10 @@ function ActionMenu({ label, onEdit, onDelete }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="btn btn-ghost btn-sm btn-square"
+        className="btn btn-ghost btn-sm btn-square transition-opacity"
         aria-label={label}
       >
-        <EllipsisHorizontalIcon className="size-6" />
+        <EllipsisHorizontalIcon className="size-5" />
       </button>
 
       {isOpen && (
