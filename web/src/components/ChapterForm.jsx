@@ -25,12 +25,12 @@ function ChapterForm({
   const submitLabel = isCreateMode ? "Create Chapter" : "Save Changes";
   const loadingLabel = isCreateMode ? "Creating..." : "Saving Changes...";
 
-useEffect(() => {
-    if(!isOpen) return;
-  setTitle(initialData?.title ?? "");
-  setDescription(initialData?.description ?? "");
-  setError(null);
-}, [isOpen, initialData]);
+  useEffect(() => {
+    if (!isOpen) return;
+    setTitle(initialData?.title ?? "");
+    setDescription(initialData?.description ?? "");
+    setError(null);
+  }, [isOpen, initialData]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -128,7 +128,9 @@ useEffect(() => {
 
           <button
             type="submit"
-            disabled={loading || mode === "create" && (!title || !description)}
+            disabled={
+              loading || (mode === "create" && (!title || !description))
+            }
             className="btn btn-primary hover:bg-primary/80"
           >
             {loading ? loadingLabel : submitLabel}

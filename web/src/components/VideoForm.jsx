@@ -163,23 +163,36 @@ function VideoForm({
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <h2 className="font-display text-2xl font-semibold">
-            {mode === "create" ? "Add Video" : "Edit Video"}
-          </h2>
-        </div>
+    <div className="w-full max-w-lg">
+      <div className="mb-6">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
+          {mode === "create" ? "New Video" : "Edit Video"}
+        </p>
 
+        <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight">
+          {mode === "create" ? "Add a video" : "Edit video"}
+        </h2>
+
+        <p className="mt-2 text-sm text-base-content/60">
+          {mode === "create"
+            ? "Add a video lesson to this chapter."
+            : "Update the video's title and description."}
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="alert alert-error">
-            <span>{error}</span>
+          <div className="rounded-md border border-error/30 bg-error/5 px-4 py-3 text-sm font-medium text-error">
+            {error}
           </div>
         )}
 
         <div>
-          <label htmlFor={`${id}-title`} className="label">
-            <span className="label-text">Title</span>
+          <label
+            htmlFor={`${id}-title`}
+            className="mb-2 block text-sm font-medium"
+          >
+            Title
           </label>
 
           <input
@@ -187,29 +200,49 @@ function VideoForm({
             type="text"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            className="input input-bordered w-full"
+            maxLength={100}
+            disabled={loading}
             required
+            placeholder="e.g. Introduction to Variables"
+            className="input input-bordered w-full"
           />
+
+          <div className="mt-1 text-right font-mono text-xs text-base-content/40">
+            {title.length}/100
+          </div>
         </div>
 
         <div>
-          <label htmlFor={`${id}-description`} className="label">
-            <span className="label-text">Description</span>
+          <label
+            htmlFor={`${id}-description`}
+            className="mb-2 block text-sm font-medium"
+          >
+            Description
           </label>
 
           <textarea
             id={`${id}-description`}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            className="textarea textarea-bordered w-full"
+            maxLength={500}
+            disabled={loading}
             rows={4}
+            placeholder="Briefly describe what this video covers..."
+            className="textarea textarea-bordered w-full resize-none"
           />
+
+          <div className="mt-1 text-right font-mono text-xs text-base-content/40">
+            {description.length}/500
+          </div>
         </div>
 
         {mode === "create" && (
           <div>
-            <label htmlFor={`${id}-video`} className="label">
-              <span className="label-text">Video (MP4)</span>
+            <label
+              htmlFor={`${id}-video`}
+              className="mb-2 block text-sm font-medium"
+            >
+              Video
             </label>
 
             <input
@@ -217,12 +250,17 @@ function VideoForm({
               type="file"
               accept="video/mp4"
               onChange={handleFileChange}
-              className="file-input file-input-bordered w-full"
+              disabled={loading}
               required
+              className="file-input file-input-bordered w-full"
             />
 
+            <p className="mt-2 text-xs text-base-content/50">
+              MP4 video files only.
+            </p>
+
             {metaDataReady && (
-              <p className="mt-2 text-sm text-base-content/60">
+              <p className="mt-2 font-mono text-xs text-base-content/60">
                 Duration: {duration} seconds
               </p>
             )}
@@ -231,8 +269,11 @@ function VideoForm({
 
         {mode === "create" && (
           <div>
-            <label htmlFor={`${id}-thumbnail`} className="label">
-              <span className="label-text">Thumbnail</span>
+            <label
+              htmlFor={`${id}-thumbnail`}
+              className="mb-2 block text-sm font-medium"
+            >
+              Thumbnail
             </label>
 
             <input
@@ -240,16 +281,24 @@ function VideoForm({
               type="file"
               accept="image/jpeg,image/png,image/webp"
               onChange={handleThumbnailChange}
-              className="file-input file-input-bordered w-full"
+              disabled={loading}
               required
+              className="file-input file-input-bordered w-full"
             />
+
+            <p className="mt-2 text-xs text-base-content/50">
+              JPEG, PNG, or WebP image.
+            </p>
           </div>
         )}
 
         {mode === "edit" && (
           <div>
-            <label htmlFor={`${id}-duration`} className="label">
-              <span className="label-text">Duration (seconds)</span>
+            <label
+              htmlFor={`${id}-duration`}
+              className="mb-2 block text-sm font-medium"
+            >
+              Duration
             </label>
 
             <input
@@ -259,6 +308,10 @@ function VideoForm({
               className="input input-bordered w-full"
               disabled
             />
+
+            <p className="mt-2 text-xs text-base-content/50">
+              Duration cannot be changed while editing.
+            </p>
           </div>
         )}
 
@@ -270,7 +323,7 @@ function VideoForm({
           preload="metadata"
         />
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 pt-2">
           <button
             type="button"
             onClick={onCancel}
@@ -282,17 +335,22 @@ function VideoForm({
 
           <button
             type="submit"
-            className="btn btn-primary hover:bgprimary/80"
+            className="btn btn-primary min-w-24"
             disabled={
               loading ||
               (mode === "create" && (!file || !thumbnail || !metaDataReady))
             }
           >
-            {loading
-              ? "Saving..."
-              : mode === "create"
-                ? "Add Video"
-                : "Save Changes"}
+            {loading ? (
+              <>
+                <span className="loading loading-spinner loading-sm" />
+                Saving...
+              </>
+            ) : mode === "create" ? (
+              "Add Video"
+            ) : (
+              "Save Changes"
+            )}
           </button>
         </div>
       </form>

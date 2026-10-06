@@ -1,5 +1,5 @@
 const SECTION_GRID =
-  "grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)] lg:items-start";
+  "grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(300px,3fr)] lg:items-start";
 
 import VideoPlayer from "../components/VideoPlayer";
 import CourseTree from "../components/CourseTree";

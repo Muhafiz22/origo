@@ -6,7 +6,8 @@ import CourseTree from "../components/CourseTree";
 
 import CourseForm from "../components/CourseForm";
 import ChapterForm from "../components/ChapterForm";
-import VideoForm from "../components/VideoForm.jsx";
+import VideoForm from "../components/VideoForm";
+import NoteForm from "../components/NoteForm";
 
 import Modal from "../components/Modal";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -15,6 +16,7 @@ import ActionMenu from "../components/ActionMenu.jsx";
 import { deleteCourse } from "../services/courseServices";
 import { deleteChapter } from "../services/chapterServices";
 import { deleteVideo } from "../services/videoServices.jsx";
+import { deleteNote } from "../services/noteServices.jsx";
 
 function CourseWorkspace() {
   const { courseId } = useParams();
@@ -32,8 +34,8 @@ function CourseWorkspace() {
   const [videoModal, setVideoModal] = useState(null);
   const [deletingVideo, setDeletingVideo] = useState(null);
 
-  const [noteModal, setNoteModal] = useState(null)
-  const [deletingNote, setDeletingNote] = useState(null)
+  const [noteModal, setNoteModal] = useState(null);
+  const [deletingNote, setDeletingNote] = useState(null);
 
   const navigate = useNavigate();
 
@@ -140,16 +142,16 @@ function CourseWorkspace() {
     });
   }
 
-  function handleEditVideo(chapter, video){
+  function handleEditVideo(chapter, video) {
     setVideoModal({
       mode: "edit",
       chapter,
       video,
-    })
+    });
   }
 
-  function handleDeleteVideo(chapter, video){
-    setDeleteError(null)
+  function handleDeleteVideo(chapter, video) {
+    setDeleteError(null);
     setDeletingVideo({
       chapter,
       video,
@@ -158,6 +160,9 @@ function CourseWorkspace() {
 
   function handleVideoSuccess(newVideo) {
     const chapterId = videoModal.chapter.id;
+
+    console.log("UPDATED VIDEO:", newVideo);
+    console.log("VIDEO MODAL:", videoModal);
 
     setChapters((chapters) =>
       chapters.map((chapter) => {
@@ -175,56 +180,54 @@ function CourseWorkspace() {
         return {
           ...chapter,
           videos: (chapter.videos ?? []).map((video) =>
-            video.id === newVideo.id
-              ? { ...video, ...newVideo }
-              : video
+            video.id === newVideo.id ? { ...video, ...newVideo } : video,
           ),
-          };
-        }),
-      );
+        };
+      }),
+    );
     setVideoModal(null);
   }
 
-  async function handleConfirmDeleteVideo(){
-    setDeleteError(null)
-    try{
+  async function handleConfirmDeleteVideo() {
+    setDeleteError(null);
+    try {
       await deleteVideo(deletingVideo.video.id);
 
-      setChapters((chapters) => 
+      setChapters((chapters) =>
         chapters.map((chapter) =>
           chapter.id === deletingVideo.chapter.id
-          ? {
-            ...chapter,
-            videos: (chapter.videos ?? []).filter(
-            (video) => video.id !== deletingVideo.video.id,
-            ),
-          }
-          : chapter,
-      ),
+            ? {
+                ...chapter,
+                videos: (chapter.videos ?? []).filter(
+                  (video) => video.id !== deletingVideo.video.id,
+                ),
+              }
+            : chapter,
+        ),
       );
-      setDeletingVideo(null)
-    } catch(error){
-      setDeleteError(error.message)
+      setDeletingVideo(null);
+    } catch (error) {
+      setDeleteError(error.message);
     }
   }
 
-  function handleCancelDeleteVideo(){
-    setDeleteError(null)
-    setDeletingVideo(null)
+  function handleCancelDeleteVideo() {
+    setDeleteError(null);
+    setDeletingVideo(null);
   }
 
   function handleCloseVideoModal() {
     setVideoModal(null);
   }
 
-  function handleAddNote(chapter){
+  function handleAddNote(chapter) {
     setNoteModal({
       mode: "create",
       chapter,
     });
   }
 
-  function handleEditNote(chapter, note){
+  function handleEditNote(chapter, note) {
     setNoteModal({
       mode: "edit",
       chapter,
@@ -232,16 +235,74 @@ function CourseWorkspace() {
     });
   }
 
-  function handleDeleteNote(chapter, note){
-    setDeleteError(null)
+  function handleDeleteNote(chapter, note) {
+    setDeleteError(null);
     setDeletingNote({
       chapter,
       note,
     });
   }
 
-  function handleNoteSuccess(newNote){
+  function handleNoteSuccess(newNote) {
+    const chapterId = noteModal.chapter.id;
 
+    console.log("UPDATED NOTE:", newNote);
+    console.log("NOTE MODAL:", noteModal);
+
+    setChapters((chapters) =>
+      chapters.map((chapter) => {
+        if (chapter.id !== chapterId) {
+          return chapter;
+        }
+
+        if (noteModal.mode === "create") {
+          return {
+            ...chapter,
+            notes: [...(chapter.notes ?? []), newNote],
+          };
+        }
+
+        return {
+          ...chapter,
+          notes: (chapter.notes ?? []).map((note) =>
+            note.id === newNote.id ? { ...note, ...newNote } : note,
+          ),
+        };
+      }),
+    );
+    setNoteModal(null);
+  }
+
+  async function handleConfirmDeleteNote() {
+    setDeleteError(null);
+    try {
+      await deleteNote(deletingNote.note.id);
+
+      setChapters((chapters) =>
+        chapters.map((chapter) =>
+          chapter.id === deletingNote.chapter.id
+            ? {
+                ...chapter,
+                notes: (chapter.notes ?? []).filter(
+                  (note) => note.id !== deletingNote.note.id,
+                ),
+              }
+            : chapter,
+        ),
+      );
+      setDeletingNote(null);
+    } catch (error) {
+      setDeleteError(error.message);
+    }
+  }
+
+  function handleCancelDeleteNote() {
+    setDeleteError(null);
+    setDeletingNote(null);
+  }
+
+  function handleCloseNoteModal() {
+    setNoteModal(null);
   }
 
   if (loading) {
@@ -309,7 +370,7 @@ function CourseWorkspace() {
           <p className="text-base-content/60">{course.description}</p>
 
           <p className="font-mono text-sm text-base-content/60">
-            {course.price === 0 ? "Free" : `₹${course.price}`}
+            {course.price === 0 ? "Free Course" : `₹${course.price}`}
           </p>
 
           <Modal
@@ -339,7 +400,10 @@ function CourseWorkspace() {
           />
         </div>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex items-center justify-between">
+          <p className="font-mono font-semibold text-xs uppercase tracking-[0.15em] text-accent">
+            CHAPTERS
+          </p>
           <button
             type="button"
             onClick={handleOpenChapterModal}
@@ -419,6 +483,29 @@ function CourseWorkspace() {
         onCancel={handleCancelDeleteVideo}
       />
 
+      <Modal isOpen={noteModal !== null} onClose={handleCloseNoteModal}>
+        {noteModal && (
+          <NoteForm
+            key={`${noteModal.mode}-${noteModal.note?.id ?? noteModal.chapter.id}`}
+            mode={noteModal.mode}
+            initialData={noteModal.note}
+            onSuccess={handleNoteSuccess}
+            onCancel={handleCloseNoteModal}
+          />
+        )}
+      </Modal>
+
+      <ConfirmDialog
+        isOpen={deletingNote !== null}
+        title={"Delete Note"}
+        message={
+          deletingNote
+            ? `Delete "${deletingNote.note.title}". This cannot be undone.`
+            : ""
+        }
+        onConfirm={handleConfirmDeleteNote}
+        onCancel={handleCancelDeleteNote}
+      />
     </main>
   );
 }

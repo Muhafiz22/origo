@@ -43,8 +43,8 @@ function VideoPlayer({ video, onPrevious, previousVideo, onNext, nextVideo }) {
     <div>
       {!video && (
         <div className="flex aspect-video items-center justify-center rounded-lg bg-base-200">
-          <p className="text-base-content/50">
-            Select a video to start learning
+          <p className="text-base-content/70">
+            No lessons have been uploaded yet. Check back later.
           </p>
         </div>
       )}

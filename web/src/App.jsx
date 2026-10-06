@@ -11,10 +11,12 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import CourseWorkspace from "./pages/CourseWorkspace";
 import { CreateCourse } from "./components/CreateCourse";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <Routes>
           <Route element={<AppLayout />}>

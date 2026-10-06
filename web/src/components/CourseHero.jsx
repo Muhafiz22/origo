@@ -18,7 +18,7 @@ function CourseHero({ course, chapterCount }) {
         </p>
 
         <div className="mt-8 flex items-center gap-6 font-mono text-sm text-base-content/60">
-          <span>{course.price === 0 ? "Free" : `₹${course.price}`}</span>
+          <span>{course.price === 0 ? "Free Course" : `₹${course.price}`}</span>
 
           <span className="h-1 w-1 rounded-full bg-base-content/30" />
 
