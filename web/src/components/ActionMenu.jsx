@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { EllipsisHorizontalIcon } from "@heroicons/react/20/solid";
 
-function ActionMenu({ label, onEdit, onDelete }) {
+function ActionMenu({ label, onEdit, onDelete, alwaysVisible = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef(null);
 
@@ -40,9 +40,11 @@ function ActionMenu({ label, onEdit, onDelete }) {
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`btn btn-ghost btn-sm btn-square transition-opacity ${
-          isOpen
+          alwaysVisible
             ? "opacity-100"
-            : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+            : isOpen
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
         }`}
         aria-label={label}
       >

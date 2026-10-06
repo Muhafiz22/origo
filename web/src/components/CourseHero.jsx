@@ -27,10 +27,6 @@ function CourseHero({ course, chapterCount }) {
           </span>
         </div>
       </div>
-
-      <div className="flex aspect-video w-full items-center justify-center rounded-lg bg-base-300 font-mono text-xs uppercase tracking-[0.2em] text-base-content/40">
-        Thumbnail
-      </div>
     </section>
   );
 }
