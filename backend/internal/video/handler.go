@@ -116,13 +116,12 @@ func (h *Handler) updateVideoHandler(e *core.RequestEvent) error {
 	userId := e.Auth.Id
 	videoId := e.Request.PathValue("videoId")
 
-	if err := h.service.updateVideo(userId, videoId, req); err != nil {
+	response, err := h.service.updateVideo(userId, videoId, req)
+	if err != nil {
 		return apis.MapError(err)
 	}
 
-	return e.JSON(http.StatusOK, map[string]string{
-		"message": "video updated succcessfully",
-	})
+	return e.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) deleteVideoHandler(e *core.RequestEvent) error {

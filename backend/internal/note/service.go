@@ -92,26 +92,26 @@ func (s *Service) getNoteForContent(noteId string) (*core.Record, error) {
 	return noteRecord, nil
 }
 
-func (s *Service) updateNote(userId string, noteId string, req UpdateNoteRequest) error {
+func (s *Service) updateNote(userId string, noteId string, req UpdateNoteRequest) (NoteMetadataResponse, error) {
 	noteRecord, err := s.isValidNote(noteId)
 	if err != nil {
-		return err
+		return NoteMetadataResponse{}, err
 	}
 
 	chapterId := noteRecord.GetString("chapterId")
 	chapterRecord, err := s.isValidChapter(chapterId)
 	if err != nil {
-		return err
+		return NoteMetadataResponse{}, err
 	}
 
 	courseId := chapterRecord.GetString("courseId")
 	courseRecord, err := s.isValidCourse(courseId)
 	if err != nil {
-		return err
+		return NoteMetadataResponse{}, err
 	}
 
 	if !isCourseCreator(courseRecord, userId) {
-		return apperr.ErrForbidden
+		return NoteMetadataResponse{}, apperr.ErrForbidden
 	}
 
 	if req.Title != nil {
@@ -127,10 +127,10 @@ func (s *Service) updateNote(userId string, noteId string, req UpdateNoteRequest
 			"failed to save note",
 			"error", err,
 		)
-		return err
+		return NoteMetadataResponse{}, err
 	}
 
-	return nil
+	return toNoteMetadataResponse(noteRecord), nil
 }
 
 func (s *Service) deleteNote(userId string, noteId string) error {

@@ -96,26 +96,26 @@ func (s *Service) getVideoForContent(videoId string) (*core.Record, error) {
 	return videoRecord, nil
 }
 
-func (s *Service) updateVideo(userId string, videoId string, req UpdateVideoRequest) error {
+func (s *Service) updateVideo(userId string, videoId string, req UpdateVideoRequest) (VideoMetadataResponse, error) {
 	videoRecord, err := s.isValidVideo(videoId)
 	if err != nil {
-		return err
+		return VideoMetadataResponse{}, err
 	}
 
 	chapterId := videoRecord.GetString("chapterId")
 	chapterRecord, err := s.isValidChapter(chapterId)
 	if err != nil {
-		return err
+		return VideoMetadataResponse{}, err
 	}
 
 	courseId := chapterRecord.GetString("courseId")
 	courseRecord, err := s.isValidCourse(courseId)
 	if err != nil {
-		return err
+		return VideoMetadataResponse{}, err
 	}
 
 	if !isCourseCreator(courseRecord, userId) {
-		return apperr.ErrForbidden
+		return VideoMetadataResponse{}, apperr.ErrForbidden
 	}
 
 	if req.Title != nil {
@@ -133,10 +133,10 @@ func (s *Service) updateVideo(userId string, videoId string, req UpdateVideoRequ
 			"failed to save video",
 			"error", err,
 		)
-		return err
+		return VideoMetadataResponse{}, err
 	}
 
-	return nil
+	return toVideoMetadataResponse(videoRecord), nil
 }
 
 func (s *Service) deleteVideo(userId string, videoId string) error {

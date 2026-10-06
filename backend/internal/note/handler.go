@@ -104,13 +104,12 @@ func (h *Handler) updateNoteHandler(e *core.RequestEvent) error {
 	userId := e.Auth.Id
 	noteId := e.Request.PathValue("noteId")
 
-	if err := h.service.updateNote(userId, noteId, req); err != nil {
+	response, err := h.service.updateNote(userId, noteId, req)
+	if err != nil {
 		return apis.MapError(err)
 	}
 
-	return e.JSON(http.StatusOK, map[string]string{
-		"message": "note updated successfully",
-	})
+	return e.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) deleteNoteHandler(e *core.RequestEvent) error {
