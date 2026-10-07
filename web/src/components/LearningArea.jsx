@@ -1,5 +1,5 @@
 const SECTION_GRID =
-  "grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(300px,3fr)] lg:items-start";
+  "grid gap-8 lg:grid-cols-[minmax(0,7.5fr)_minmax(300px,2.5fr)] lg:items-start";
 
 import VideoPlayer from "../components/VideoPlayer";
 import CourseTree from "../components/CourseTree";
@@ -14,7 +14,7 @@ function LearningArea({
   onNext,
 }) {
   return (
-    <section className={`mt-16 ${SECTION_GRID}`}>
+    <section className={`mt-4 ${SECTION_GRID}`}>
       <div>
         <VideoPlayer
           video={activeVideo}

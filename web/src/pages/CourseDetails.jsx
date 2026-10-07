@@ -84,7 +84,7 @@ function CourseDetails() {
   }
 
   return (
-    <main className="mx-auto max-w-[1600px] px-6 py-16 lg:px-8">
+    <main className="mx-auto px-4 py-4 lg:px-5">
       <CourseHero course={course} chapterCount={chapters.length} />
 
       <LearningArea

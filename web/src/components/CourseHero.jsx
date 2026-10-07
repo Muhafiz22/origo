@@ -5,20 +5,18 @@ function CourseHero({ course, chapterCount }) {
   return (
     <section className={SECTION_GRID}>
       <div>
-        <h1 className="mt-4 max-w-4xl font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+        <h1 className="mt-2 max-w-4xl font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-5xl">
           {course.name}
         </h1>
 
-        <p className="font-mono text-xs tracking-[0.1em] text-accent">
-          By {course.creatorName}
-        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-xs tracking-[0.1em] text-base-content/60">
+          <span className="text-accent">By {course.creatorName}</span>
 
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-base-content/70">
-          {course.description}
-        </p>
+          <span className="h-1 w-1 rounded-full bg-base-content/30" />
 
-        <div className="mt-8 flex items-center gap-6 font-mono text-sm text-base-content/60">
-          <span>{course.price === 0 ? "Free Course" : `₹${course.price}`}</span>
+          <span>
+            {course.price === 0 ? "Free Course" : `₹${course.price}`}
+          </span>
 
           <span className="h-1 w-1 rounded-full bg-base-content/30" />
 
@@ -26,6 +24,10 @@ function CourseHero({ course, chapterCount }) {
             {chapterCount} {chapterCount === 1 ? "chapter" : "chapters"}
           </span>
         </div>
+
+        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-base-content/70">
+          {course.description}
+        </p>
       </div>
     </section>
   );
