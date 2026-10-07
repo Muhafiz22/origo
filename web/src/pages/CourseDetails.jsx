@@ -3,6 +3,7 @@ import { useParams } from "react-router";
 import useCourseWithChapters from "../hooks/useCourseWithChapters";
 import CourseHero from "../components/CourseHero";
 import LearningArea from "../components/LearningArea";
+import CourseInformation from "../components/CourseInformation";
 
 function CourseDetails() {
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -23,6 +24,26 @@ function CourseDetails() {
     currentIndex >= 0 && currentIndex < allVideos.length - 1
       ? allVideos[currentIndex + 1]
       : null;
+
+
+  const currentChapterIndex = chapters.findIndex((chapter) =>
+    chapter.videos?.some((video) => video.id === activeVideo?.id),
+  );
+
+
+  const currentVideoIndex =
+    currentChapterIndex >= 0
+      ? chapters[currentChapterIndex].videos.findIndex(
+          (video) => video.id === activeVideo?.id,
+        )
+      : -1;
+
+
+  const chapterNumber =
+    currentChapterIndex >= 0 ? currentChapterIndex + 1 : null;
+
+  const videoNumber =
+    currentVideoIndex >= 0 ? currentVideoIndex + 1 : null;
 
   function handleVideoSelect(video) {
     setSelectedVideo(video);
@@ -84,18 +105,22 @@ function CourseDetails() {
   }
 
   return (
-    <main className="mx-auto px-4 py-4 lg:px-5">
+    <main className="mx-auto px-4 py-4 lg:px-4">
       <CourseHero course={course} chapterCount={chapters.length} />
 
       <LearningArea
         chapters={chapters}
         activeVideo={activeVideo}
+        chapterNumber={chapterNumber}
+        videoNumber={videoNumber}
         previousVideo={previousVideo}
         nextVideo={nextVideo}
         onVideoSelect={handleVideoSelect}
         onPrevious={handlePreviousVideo}
         onNext={handleNextVideo}
       />
+
+      <CourseInformation course={course}/>
     </main>
   );
 }

@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
 import { getVideoContent } from "../services/videoServices";
 
-function VideoPlayer({ video, onPrevious, previousVideo, onNext, nextVideo }) {
+function VideoPlayer({ 
+  chapterNumber,
+  videoNumber,
+  video, 
+  onPrevious, 
+  previousVideo,
+  onNext,
+  nextVideo
+}) {
   const [videoUrl, setVideoUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -75,36 +83,34 @@ function VideoPlayer({ video, onPrevious, previousVideo, onNext, nextVideo }) {
       )}
 
       {video && (
-        <>
-          <div className="mt-6">
-            <h2 className="font-display text-2xl font-semibold">
-              {video.title}
-            </h2>
-            <p className="mt-2 leading-relaxed text-base-content/70">
-              {video.description}
-            </p>
+        <div className="mt-6 grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-6 border-t border-base-300 pt-6">
+          <button
+            type="button"
+            onClick={onPrevious}
+            disabled={!previousVideo}
+            className="btn btn-ghost hover:text-accent"
+          >
+            Previous
+          </button>
+
+          <div className="min-w-0 font-display text-xl font-semibold">
+            {chapterNumber && videoNumber && (
+              <span className="mr-4 font-mono text-sm font-normal text-base-content/50">
+                Ch {chapterNumber} · Vid {videoNumber}
+              </span>
+            )}
+              <span className="block sm:inline">{video.title}</span>
           </div>
 
-          <div className="mt-8 flex items-center justify-between border-t border-base-300 pt-6">
-            <button
-              type="button"
-              onClick={onPrevious}
-              disabled={!previousVideo}
-              className="btn btn-ghost hover:text-accent"
-            >
-              Previous
-            </button>
-
-            <button
-              type="button"
-              onClick={onNext}
-              disabled={!nextVideo}
-              className="btn btn-primary hover:btn-primary/80"
-            >
-              Next
-            </button>
-          </div>
-        </>
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={!nextVideo}
+            className="btn btn-primary hover:btn-primary/80"
+          >
+            Next
+          </button>
+        </div>
       )}
     </div>
   );

@@ -14,9 +14,7 @@ function CourseHero({ course, chapterCount }) {
 
           <span className="h-1 w-1 rounded-full bg-base-content/30" />
 
-          <span>
-            {course.price === 0 ? "Free Course" : `₹${course.price}`}
-          </span>
+          <span>{course.price === 0 ? "Free Course" : `₹${course.price}`}</span>
 
           <span className="h-1 w-1 rounded-full bg-base-content/30" />
 
@@ -24,10 +22,6 @@ function CourseHero({ course, chapterCount }) {
             {chapterCount} {chapterCount === 1 ? "chapter" : "chapters"}
           </span>
         </div>
-
-        <p className="mt-4 max-w-2xl text-lg leading-relaxed text-base-content/70">
-          {course.description}
-        </p>
       </div>
     </section>
   );
