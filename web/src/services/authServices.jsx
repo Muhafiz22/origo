@@ -25,3 +25,11 @@ export function signup(credentials) {
     body: JSON.stringify(credentials),
   });
 }
+
+export function verifyEmail(token) {
+  return apiClient("/auth/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+  });
+}

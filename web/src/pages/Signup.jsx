@@ -24,7 +24,7 @@ function Signup() {
         email,
         password,
       });
-      navigate("/login");
+      navigate("/verify-email");
     } catch (error) {
       setError(error);
     } finally {
