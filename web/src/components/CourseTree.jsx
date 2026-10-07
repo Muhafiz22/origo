@@ -1,6 +1,8 @@
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ActionMenu from "./ActionMenu";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/16/solid";
+import { PlayIcon } from "lucide-react";
 
 function CourseTree({
   chapters,
@@ -17,6 +19,8 @@ function CourseTree({
   onDeleteNote,
 }) {
   const [expandedChapters, setExpandedChapters] = useState(new Set());
+  const selectedRowRef = useRef(null);
+  const pendingScrollRef = useRef(false);
 
   function toggleChapter(chapterId) {
     setExpandedChapters((current) => {
@@ -45,12 +49,24 @@ function CourseTree({
       return;
     }
 
+    pendingScrollRef.current = true;
+
     setExpandedChapters((current) => {
       const next = new Set(current);
       next.add(chapter.id);
       return next;
     });
   }, [selectedVideoId, chapters]);
+
+
+  useEffect(() => {
+    if (!pendingScrollRef.current || !selectedRowRef.current) {
+      return;
+    }
+
+    selectedRowRef.current.scrollIntoView({ block: "nearest" });
+    pendingScrollRef.current = false;
+  }, [selectedVideoId, expandedChapters]);
 
   return (
     <div>
@@ -67,7 +83,10 @@ function CourseTree({
                 className="flex flex-1 items-center gap-3 text-left transition-colors"
               >
                 <span className="w-4 font-mono text-xs text-accent">
-                  {isExpanded ? "▼" : "▶"}
+                  {isExpanded 
+                    ? <ChevronDownIcon className="size-5" />
+                    : <ChevronRightIcon className="size-5" />
+                  }
                 </span>
 
                 <span className="w-6 font-mono text-base-content/60">
@@ -109,11 +128,12 @@ function CourseTree({
                     return (
                       <div
                         key={video.id}
+                        ref={isSelected ? selectedRowRef : null}
                         className="group flex items-center gap-2"
                       >
-                        <span
-                          className={`size-2 shrink-0 rounded-full ${
-                            isSelected ? "bg-accent" : "bg-base-content/30"
+                        <PlayIcon 
+                        className={`size-4 shrink-0 ${
+                          isSelected ? "text-accent" : "text-base-content/40"
                           }`}
                         />
 
@@ -121,10 +141,10 @@ function CourseTree({
                           type="button"
                           onClick={() => onVideoSelect(video)}
                           aria-selected={isSelected ? true : undefined}
-                          className={`min-w-0 flex-1 rounded-md px-3 py-2.5 text-left text-base transition-colors ${
+                          className={`min-w-0 flex-1 rounded-md border-l-2 px-3 py-2.5 text-left text-base transition-colors ${
                             isSelected
-                              ? "bg-base-200 font-semibold text-accent"
-                              : "text-base-content/70 hover:bg-base-200/70 hover:text-base-content"
+                              ? "border-accent bg-accent/20 font-semibold text-base-content/80"
+                              : "border-transparent text-base-content/70 hover:bg-base-200/70 hover:text-base-content"
                           }`}
                         >
                           {video.title}
@@ -182,7 +202,7 @@ function CourseTree({
                       <button
                         type="button"
                         onClick={() => onAddNote(chapter)}
-                        className="btn btn-primary btn-outline btn-sm flex-1 bordered hover-bg-primary"
+                        className="btn btn-primary btn-outline btn-sm flex-1 bordered hover:bg-primary"
                       >
                         + Add Note
                       </button>

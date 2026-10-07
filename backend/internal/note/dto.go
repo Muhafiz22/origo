@@ -1,8 +1,8 @@
 package note
 
 type CreateNoteRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	Title       string `json:"title" form:"title"`
+	Description string `json:"description" form:"description"`
 }
 
 type UpdateNoteRequest struct {

@@ -2,6 +2,7 @@ package note
 
 import (
 	"backend/internal/apperr"
+	"fmt"
 
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
@@ -64,6 +65,7 @@ func (s *Service) createNote(userId string, chapterId string, req CreateNoteRequ
 			"failed to save note record",
 			"error", err,
 		)
+		fmt.Print("Error saving notes", err)
 		return NoteMetadataResponse{}, err
 	}
 

@@ -488,6 +488,7 @@ function CourseWorkspace() {
           <NoteForm
             key={`${noteModal.mode}-${noteModal.note?.id ?? noteModal.chapter.id}`}
             mode={noteModal.mode}
+            chapterId={noteModal.chapter.id}
             initialData={noteModal.note}
             onSuccess={handleNoteSuccess}
             onCancel={handleCloseNoteModal}
