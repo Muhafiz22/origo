@@ -1,53 +1,68 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router";
+import { useSearchParams, Link } from "react-router";
 import { verifyEmail } from "../services/authServices";
-import {Link} from "react-router";
-function VerifyEmail() {
-  const [verify, setVerify] = useState(false)
-  const [error, setError] = useState(null)
 
+function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
+
+  const [status, setStatus] = useState(token ? "loading" : "error");
+  const [errorMessage, setErrorMessage] = useState(
+    token ? "" : "Invalid verification link",
+  );
 
   useEffect(() => {
     if (!token) {
       return;
     }
 
+    let cancelled = false;
+
     verifyEmail(token)
       .then(() => {
-        setVerify(true);
+        if (!cancelled) {
+          setStatus("success");
+        }
       })
       .catch((err) => {
-        setError(err.message || "Verification failed");
+        if (!cancelled) {
+          setStatus("error");
+          setErrorMessage(err.message || "Verification failed");
+        }
       });
-  }, [token]);
 
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   return (
     <main>
-    {error ? (
-      <div>
-        <h1>Verification Failed</h1>
-        <p>{error}</p>
-        <Link to="/login">Go to Login</Link>
-      </div>
-    ) : verify ? (
-      <div>
-        <h1>Email Verified</h1>
-        <p>Your email has been successfully verified.</p>
-        <Link to="/login">Go to Login</Link>
+      {status === "error" && (
+        <div>
+          <h1>Verification Failed</h1>
+          <p>{errorMessage}</p>
+          <p>Need a new link?</p>
+          <ResendVerification />
+          <Link to="/login">Back to login</Link>
         </div>
-    ) : (
-      <div>
-        <h1>Check Your Email</h1>
-          <p>
-            A verification link has been sent to your email address.
-            Click the link to verify your account.
-          </p>
-      </div>    
-    )}
-  </main>
+      )}
+
+      {status === "loading" && (
+        <div>
+          <h1>Verifying Your Email</h1>
+          <p>Please wait while we verify your email address.</p>
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      )}
+
+      {status === "success" && (
+        <div>
+          <h1>Email Verified Successfully</h1>
+          <Link to="/login">Log in</Link>
+        </div>
+      )}
+    </main>
   );
 }
 

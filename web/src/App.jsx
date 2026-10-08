@@ -7,6 +7,7 @@ import AppLayout from "./layouts/AppLayout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import VerifyEmail from "./pages/VerifyEmail";
+import CheckEmail from "./pages/CheckEmail";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
@@ -22,7 +23,8 @@ function App() {
         <Routes>
           <Route element={<AppLayout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/verify-email" element={<VerifyEmail />}/>
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/check-email" element={<CheckEmail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
 

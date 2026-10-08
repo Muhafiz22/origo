@@ -73,9 +73,8 @@ func (h *Handler) resendVerificationHandler(e *core.RequestEvent) error {
 		return apis.MapError(apperr.FromValidationErrors(validationErrors))
 	}
 
-	if err := h.service.resendVerification(req); err != nil {
-		return apis.MapError(err)
-	}
+	h.service.resendVerification(req.Email)
+
 	return e.JSON(http.StatusOK, map[string]string{
 		"message": "if the email is registered, a verification link has been sent",
 	})

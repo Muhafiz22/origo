@@ -4,11 +4,11 @@ import (
 	"backend/internal/apperr"
 	"database/sql"
 	"errors"
-	"strings"
 
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/mails"
+	"github.com/pocketbase/pocketbase/tools/routine"
 )
 
 type Service struct {
@@ -33,70 +33,74 @@ func (s *Service) authenticateMe(record *core.Record) UserProfileResponse {
 }
 
 func (s *Service) registerUser(req RegisterRequest) (RegisterResponse, error) {
+	record, err := s.app.FindAuthRecordByEmail("users", req.Email)
+
+	if err == nil {
+		if record.Verified() {
+			return RegisterResponse{}, apperr.FromValidationErrors(map[string]error{
+				"email": errors.New("email is already registered"),
+			})
+		}
+
+		// Unverified account: the latest signup wins.
+		record.Set("name", req.Username)
+		record.SetPassword(req.Password)
+		// Invalidate any verification link issued for the previous signup.
+		record.RefreshTokenKey()
+
+		if err := s.app.Save(record); err != nil {
+			return RegisterResponse{}, mapSaveError(err)
+		}
+
+		return s.sendVerification(record), nil
+	}
+
+	if !errors.Is(err, sql.ErrNoRows) {
+		s.app.Logger().Error(
+			"failed to look up user record",
+			"email", req.Email,
+			"error", err,
+		)
+		return RegisterResponse{}, err
+	}
+
 	collection, err := s.app.FindCollectionByNameOrId("users")
 	if err != nil {
 		return RegisterResponse{}, err
 	}
 
-	record := core.NewRecord(collection)
-
+	record = core.NewRecord(collection)
 	record.Set("name", req.Username)
 	record.Set("email", req.Email)
 	record.SetPassword(req.Password)
 
 	if err := s.app.Save(record); err != nil {
-		if joined, ok := err.(interface{ Unwrap() []error }); ok {
-			fieldErrors := make(map[string]error)
-			for _, e := range joined.Unwrap() {
-				field, msg, found := strings.Cut(e.Error(), ": ")
-				if found {
-					fieldErrors[field] = errors.New(msg)
-				} else {
-					fieldErrors["_"] = e
-				}
-			}
-			return RegisterResponse{}, apperr.FromValidationErrors(fieldErrors)
-		}
-		return RegisterResponse{}, err
-	}
-	result := RegisterResponse{UserId: record.Id}
-
-	if err := mails.SendRecordVerification(s.app, record); err != nil {
-		s.app.Logger().Error(
-			"failed to send verification email",
-			"userId", record.Id,
-			"email", req.Email,
-			"error", err,
-		)
-		return result, nil
+		return RegisterResponse{}, mapSaveError(err)
 	}
 
-	result.VerificationSent = true
-
-	return result, nil
+	return s.sendVerification(record), nil
 }
 
-func (s *Service) resendVerification(req ResendVerificationRequest) error {
-	record, err := s.app.FindAuthRecordByEmail("users", req.Email)
+func (s *Service) resendVerification(email string) {
+	record, err := s.app.FindAuthRecordByEmail("users", email)
 	if err != nil {
-		s.app.Logger().Error(
-			"verification requested for unknown email",
-			"email", req.Email,
-		)
-		return nil
+		if !errors.Is(err, sql.ErrNoRows) {
+			s.app.Logger().Error(
+				"failed to look up user for verification resend",
+				"error", err,
+			)
+		}
+		return
 	}
 
-	if err := mails.SendRecordVerification(s.app, record); err != nil {
-		s.app.Logger().Error(
-			"failed to send verification email",
-			"userId", record.Id,
-			"email", req.Email,
-			"error", err,
-		)
-		return err
+	if record.Verified() {
+		return
 	}
 
-	return nil
+	// Background send keeps response time the same whether or not the email exists.
+	routine.FireAndForget(func() {
+		s.sendVerification(record)
+	})
 }
 
 func (s *Service) verifyUser(req VerifyRequest) error {
