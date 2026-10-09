@@ -5,9 +5,10 @@ import (
 )
 
 var (
-	ErrNotFound   = errors.New("not found")
-	ErrForbidden  = errors.New("forbidden")
-	ErrValidation = errors.New("validation failed")
+	ErrNotFound     = errors.New("not found")
+	ErrForbidden    = errors.New("forbidden")
+	ErrValidation   = errors.New("validation failed")
+	ErrInvalidToken = errors.New("Invalid or expired token")
 )
 
 type ValidationError struct {

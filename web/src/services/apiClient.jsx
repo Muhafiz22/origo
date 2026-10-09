@@ -1,24 +1,41 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL ?? "";
+
+export class ApiError extends Error {
+  constructor(message, status = 0) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
 
 async function apiClient(endpoint, options = {}) {
-  const isFormData = options.body instanceof FormData;
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    credentials: "include",
-    ...options,
-    headers: {
-      ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      ...options.headers,
-    },
-  });
+  let response;
 
-  if (!response.ok) {
-    const error = new Error(`API request failed: ${response.status}`);
-    error.status = response.status;
-
-    throw error;
+  try {
+    response = await fetch(`${API_URL}${endpoint}`, {
+      credentials: "include",
+      ...options,
+      headers: {
+        ...(options.body instanceof FormData
+          ? {}
+          : { "Content-Type": "application/json" }),
+        ...options.headers,
+      },
+    });
+  } catch {
+    throw new ApiError("Unable to reach the server", 0);
   }
 
-  return response.json();
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new ApiError(
+      data?.message || `Request failed (${response.status})`,
+      response.status,
+    );
+  }
+
+  return data;
 }
 
 export default apiClient;

@@ -4,6 +4,7 @@ import (
 	"backend/internal/apperr"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
@@ -107,10 +108,14 @@ func (s *Service) verifyUser(req VerifyRequest) error {
 	record, err := s.app.FindAuthRecordByToken(req.Token, core.TokenTypeVerification)
 	if err != nil {
 		s.app.Logger().Error(
-			"invalid or expired token",
+			"invalid or expired verification token",
 			"error", err,
 		)
-		return err
+		return fmt.Errorf("%w: %w", apperr.ErrInvalidToken, err)
+	}
+
+	if record.Verified() {
+		return nil
 	}
 
 	record.SetVerified(true)

@@ -17,13 +17,16 @@ func MapError(err error) error {
 		return apis.NewBadRequestError("validation failed", ve.Fields)
 
 	case errors.Is(err, apperr.ErrNotFound):
-		return apis.NewNotFoundError(err.Error(), nil)
+		return apis.NewNotFoundError(apperr.ErrNotFound.Error(), nil)
 
 	case errors.Is(err, apperr.ErrForbidden):
-		return apis.NewForbiddenError(err.Error(), nil)
+		return apis.NewForbiddenError(apperr.ErrForbidden.Error(), nil)
 
 	case errors.Is(err, apperr.ErrValidation):
-		return apis.NewBadRequestError(err.Error(), nil)
+		return apis.NewBadRequestError(apperr.ErrValidation.Error(), nil)
+
+	case errors.Is(err, apperr.ErrInvalidToken):
+		return apis.NewBadRequestError(apperr.ErrInvalidToken.Error(), nil)
 
 	default:
 		return apis.NewApiError(500, "internal server error", nil)
