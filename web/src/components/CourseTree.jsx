@@ -1,8 +1,9 @@
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
-import { useEffect, useRef, useState } from "react";
-import ActionMenu from "./ActionMenu";
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/16/solid";
 import { PlayIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import ActionMenu from "./ActionMenu";
+import { getNoteContent } from "../services/noteServices";
 
 function CourseTree({
   chapters,
@@ -19,6 +20,7 @@ function CourseTree({
   onDeleteNote,
 }) {
   const [expandedChapters, setExpandedChapters] = useState(new Set());
+  const [noteError, setNoteError] = useState(null)
   const selectedRowRef = useRef(null);
   const pendingScrollRef = useRef(false);
 
@@ -67,6 +69,17 @@ function CourseTree({
     selectedRowRef.current.scrollIntoView({ block: "nearest" });
     pendingScrollRef.current = false;
   }, [selectedVideoId, expandedChapters]);
+
+  async function handleOpenNote(note){
+    try{
+      const blob = await getNoteContent(note.id)
+      const url = URL.createObjectURL(blob)
+
+      window.open(url, "_blank")
+    }catch(error){
+      setNoteError(`failed to open ${note.title}`)
+    }
+  }
 
   return (
     <div>
@@ -170,10 +183,17 @@ function CourseTree({
 
                       <button
                         type="button"
+                        onClick={() => handleOpenNote(note)}
                         className="min-w-0 flex-1 rounded-md px-3 py-2.5 text-left text-base text-base-content/70 hover:bg-base-200/70 hover:text-base-content"
                       >
                         {note.title}
                       </button>
+
+                      {noteError && (
+                        <p className="px-3 py-2 text-sm text-error">
+                          {noteError}
+                        </p>
+                      )}
 
                       {mode === "editor" && (
                         <ActionMenu

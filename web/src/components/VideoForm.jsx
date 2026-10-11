@@ -39,15 +39,18 @@ function VideoForm({
 
     if (!selectedFile) return;
 
+    const validExts = [".mp4", ".webm", ".ogg"]; 
+    const validFileTypes = ["video/mp4", "video/webm", "video/ogg"]
+
     const ext = selectedFile.name
       .slice(selectedFile.name.lastIndexOf("."))
       .toLowerCase();
 
-    if (ext !== ".mp4" || selectedFile.type !== "video/mp4") {
+    if (!validExts.includes(ext) || !validFileTypes.includes(selectedFile.type)) {
       setFile(null);
       setDuration(0);
       setMetaDataReady(false);
-      setError("Video must be an MP4 file");
+      setError("Video must be a mp4, webm or ogg file");
 
       event.target.value = "";
       return;
@@ -256,7 +259,7 @@ function VideoForm({
             />
 
             <p className="mt-2 text-xs text-base-content/50">
-              MP4 video files only.
+              MP4, WEBM or OGG video files only.
             </p>
 
             {metaDataReady && (

@@ -42,7 +42,7 @@ export function getCurrentUser() {
   return apiClient("/auth/me");
 }
 
-export function forgotPassowrd(email) {
+export function forgotPassword(email) {
   return apiClient("/auth/forgot-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

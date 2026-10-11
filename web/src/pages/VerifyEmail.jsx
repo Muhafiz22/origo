@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import ResendVerification from "../components/ResendVerification";
 import { verifyEmail } from "../services/authServices";
+import { CheckBadgeIcon, ExclamationTriangleIcon } from "@heroicons/react/16/solid";
 
 const INVALID_LINK_MESSAGE =
   "This verification link is invalid or has expired.";
@@ -61,26 +62,13 @@ function VerifyEmail() {
           {status === "success" && (
             <>
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success/15 text-success">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
+                <CheckBadgeIcon className="size-12" />
               </div>
               <h1 className="card-title text-2xl">Email verified</h1>
               <p className="text-base-content/70">
                 Your account is ready. You can log in now.
               </p>
-              <Link to="/login" className="btn btn-primary w-full mt-2">
+              <Link to="/login" className="btn btn-primary w-full mt-2 hover:bg-primary/80">
                 Log in
               </Link>
             </>
@@ -89,20 +77,7 @@ function VerifyEmail() {
           {status === "error" && (
             <>
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error/15 text-error">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <ExclamationTriangleIcon className="size-12" />
               </div>
               <h1 className="card-title text-2xl">Verification failed</h1>
               <p className="text-base-content/70">{errorMessage}</p>
@@ -110,7 +85,7 @@ function VerifyEmail() {
               <div className="divider my-1">Need a new link?</div>
               <ResendVerification />
 
-              <Link to="/login" className="btn btn-ghost btn-sm mt-2">
+              <Link to="/login" className="btn btn-ghost btn-sm mt-2 hover:text-accent">
                 Back to login
               </Link>
             </>

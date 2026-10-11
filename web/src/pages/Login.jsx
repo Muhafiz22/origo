@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
+import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
+import { ApiError } from "../services/apiClient";
+import { XMarkIcon } from "@heroicons/react/24/solid";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 function Login() {
   const navigate = useNavigate();
@@ -9,8 +13,11 @@ function Login() {
   const [identity, setIdentity] = useState("");
   const [password, setPassword] = useState("");
 
+  const [showPassword, setShowPassword] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const handleApiError = useApiErrorHandler();
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -24,12 +31,23 @@ function Login() {
         password,
       });
       navigate("/");
-    } catch (error) {
-      setError(error);
+    } catch (err) {
+      if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
+        if (err.hasFields) {
+          setError(Object.values(err.fields)[0]); // e.g. "email cannot be empty"
+        } else if (err.status === 400 || err.status === 401) {
+          setError("Incorrect email or password.");
+        } else {
+          setError(err.message);
+        }
+      } else {
+        handleApiError(err); // network failure / 5xx -> toast
+      }
     } finally {
       setLoading(false);
     }
   }
+
   return (
     <main className="mx-auto flex min-h-[calc(100vh-81px)] max-w-7xl items-center justify-center px-6 py-16 lg:px-8">
       <section className="w-full max-w-md">
@@ -52,7 +70,8 @@ function Login() {
           className="border border-base-300 bg-base-200 p-6 sm:p-8"
         >
           {error && (
-            <div className="mb-6 border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
+            <div className="mb-6 flex items-center gap-2 border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
+              <XMarkIcon className="size-4" />
               {error}
             </div>
           )}
@@ -75,7 +94,6 @@ function Login() {
                 className="input w-full rounded-none border-base-300 bg-base-100 focus:border-accent focus:outline-none"
               />
             </div>
-
             <div>
               <label
                 htmlFor="password"
@@ -84,14 +102,29 @@ function Login() {
                 Password
               </label>
 
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="input w-full rounded-none border-base-300 bg-base-100 focus:border-accent focus:outline-none"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="input w-full rounded-none border-base-300 bg-base-100 pr-10 focus:border-accent focus:outline-none"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-3 flex items-center text-base-content/50 hover:text-base-content"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="size-5" />
+                  ) : (
+                    <EyeIcon className="size-5" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -104,7 +137,16 @@ function Login() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-base-content/60">
+        <div className="mt-4 flex justify-center">
+          <Link
+            to="/forgot-password"
+            className="text-sm items-center text-base-content transition-colors hover:text-primary"
+          >
+            Forgot password?
+          </Link>
+        </div>
+
+        <p className="mt-2 text-center text-sm text-base-content/60">
           Don't have an account?{" "}
           <Link
             to="/signup"

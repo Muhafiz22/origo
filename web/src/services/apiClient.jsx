@@ -1,11 +1,29 @@
 const API_URL = import.meta.env.VITE_API_URL ?? "";
 
 export class ApiError extends Error {
-  constructor(message, status = 0) {
+  constructor(message, status = 0, fields = {}) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.fields = fields; // { fieldName: "message" }
   }
+  get isNetwork() {
+    return this.status === 0;
+  }
+  get isServer() {
+    return this.status >= 500;
+  }
+  get hasFields() {
+    return Object.keys(this.fields).length > 0;
+  }
+}
+
+function extractFields(data) {
+  const fields = {};
+  for (const [name, detail] of Object.entries(data?.data ?? {})) {
+    if (detail?.message) fields[name] = detail.message;
+  }
+  return fields;
 }
 
 async function apiClient(endpoint, options = {}) {
@@ -32,6 +50,7 @@ async function apiClient(endpoint, options = {}) {
     throw new ApiError(
       data?.message || `Request failed (${response.status})`,
       response.status,
+      extractFields(data),
     );
   }
 

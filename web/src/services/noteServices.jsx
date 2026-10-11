@@ -28,3 +28,17 @@ export async function deleteNote(noteId) {
     method: "DELETE",
   });
 }
+
+export async function getNoteContent(noteId) {
+  const response = await fetch(`${API_URL}/notes/${noteId}/content`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const error = new Error(`note request failed: ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+
+  return response.blob();
+}

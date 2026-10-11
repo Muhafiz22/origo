@@ -34,7 +34,7 @@ function ResendVerification({ initialEmail = "" }) {
       />
       <button
         type="submit"
-        className="btn btn-primary w-full"
+        className="btn btn-primary w-full hover:bg-primary/80"
         disabled={status === "sending"}
       >
         {status === "sending" && (
