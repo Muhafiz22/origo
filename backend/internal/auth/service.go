@@ -10,6 +10,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/mails"
 	"github.com/pocketbase/pocketbase/tools/routine"
+	"github.com/pocketbase/pocketbase/tools/security"
 )
 
 type Service struct {
@@ -152,19 +153,13 @@ func (s *Service) authenticate(req LoginRequest) (*core.Record, error) {
 	return record, nil
 }
 
-func (s *Service) sendPasswordResetEmail(req ForgotPasswordRequest) error {
+func (s *Service) sendPasswordResetEmail(req ForgotPasswordRequest) {
 	record, err := s.app.FindAuthRecordByEmail("users", req.Email)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil
+		if !errors.Is(err, sql.ErrNoRows) {
+			s.app.Logger().Error("failed to look up user for password reset", "error", err)
 		}
-
-		s.app.Logger().Error(
-			"failed to look up user for password reset",
-			"email", req.Email,
-			"error", err,
-		)
-		return err
+		return
 	}
 
 	if err := mails.SendRecordPasswordReset(s.app, record); err != nil {
@@ -174,36 +169,36 @@ func (s *Service) sendPasswordResetEmail(req ForgotPasswordRequest) error {
 			"email", record.Email,
 			"error", err,
 		)
-		return err
+		return
 	}
-
-	return nil
 }
 
 func (s *Service) resetPassword(req ResetPasswordRequest) error {
 	record, err := s.app.FindAuthRecordByToken(req.Token, core.TokenTypePasswordReset)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return apis.NewBadRequestError("invalid or expired token ", nil)
-		}
-		s.app.Logger().Error(
-			"failed to validate password reset token",
-			"error", err,
-		)
-		return err
+		return apperr.ErrInvalidToken
+	}
+
+	claims, err := security.ParseUnverifiedJWT(req.Token)
+	if err != nil {
+		return apperr.ErrInvalidToken
+	}
+
+	if tokenEmail, _ := claims["email"].(string); tokenEmail != record.Email() {
+		return apperr.ErrInvalidToken
 	}
 
 	record.SetPassword(req.NewPassword)
+	record.SetVerified(true)
 	record.RefreshTokenKey()
 
-	err = s.app.Save(record)
-	if err != nil {
+	if err := s.app.Save(record); err != nil {
 		s.app.Logger().Error(
 			"failed to save new password",
 			"userId", record.Id,
 			"error", err,
 		)
-		return apis.NewInternalServerError("password reset failed", nil)
+		return err
 	}
 	return nil
 }

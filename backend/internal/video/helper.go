@@ -24,15 +24,25 @@ func toVideoMetadataResponse(record *core.Record) VideoMetadataResponse {
 }
 
 func isValidVideoFile(header *multipart.FileHeader) error {
-	if strings.ToLower(filepath.Ext(header.Filename)) != ".mp4" {
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+
+	switch ext {
+	case ".mp4", ".webm", ".ogg":
+
+	default:
 		return apperr.FromValidationErrors(map[string]error{
-			"video": errors.New("video must be an MP4 file"),
+			"video": errors.New("video must be a mp4, webm, or ogg type"),
 		})
 	}
 
-	if header.Header.Get("Content-Type") != "video/mp4" {
+	contentType := header.Header.Get("Content-Type")
+
+	switch contentType {
+	case "video/mp4", "video/webm", "video/ogg":
+
+	default:
 		return apperr.FromValidationErrors(map[string]error{
-			"video": errors.New("video must be an MP4 file"),
+			"video": errors.New("video must be a mp4, webm, or ogg type"),
 		})
 	}
 

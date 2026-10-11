@@ -155,9 +155,8 @@ func (h *Handler) forgotPasswordHandler(e *core.RequestEvent) error {
 		return apis.MapError(apperr.FromValidationErrors(validationErrors))
 	}
 
-	if err := h.service.sendPasswordResetEmail(req); err != nil {
-		return apis.MapError(err)
-	}
+	h.service.sendPasswordResetEmail(req)
+
 	return e.JSON(http.StatusOK, map[string]string{
 		"message": "if the email is registered, a password reset link has been sent",
 	})
@@ -174,7 +173,7 @@ func (h *Handler) resetPasswordHandler(e *core.RequestEvent) error {
 		validationErrors["token"] = errors.New("token cannot be empty")
 	}
 	if req.NewPassword == "" {
-		validationErrors["password"] = errors.New("password cannot be empty")
+		validationErrors["newPassword"] = errors.New("password cannot be empty")
 	} else if len(req.NewPassword) < 8 {
 		validationErrors["password"] = errors.New("password must be at least 8 characters")
 	}

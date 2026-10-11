@@ -41,6 +41,8 @@ func CreateVideoCollection(app core.App) *core.Collection {
 			MaxSize:   100 * 1024 * 1024,
 			MimeTypes: []string{
 				"video/mp4",
+				"video/webm",
+				"video/ogg",
 			},
 		},
 

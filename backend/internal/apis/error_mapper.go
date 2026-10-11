@@ -3,7 +3,10 @@ package apis
 import (
 	"backend/internal/apperr"
 	"errors"
+
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/pocketbase/pocketbase/apis"
+	"github.com/pocketbase/pocketbase/tools/router"
 )
 
 func MapError(err error) error {
@@ -11,10 +14,19 @@ func MapError(err error) error {
 		return nil
 	}
 
+	var apiErr *router.ApiError
+	if errors.As(err, &apiErr) {
+		return apiErr
+	}
+
 	var ve *apperr.ValidationError
 	switch {
 	case errors.As(err, &ve):
-		return apis.NewBadRequestError("validation failed", ve.Fields)
+		fields := make(validation.Errors, len(ve.Fields))
+		for name, msg := range ve.Fields {
+			fields[name] = validation.NewError("validation_invalid_value", msg)
+		}
+		return apis.NewBadRequestError("validation failed", fields)
 
 	case errors.Is(err, apperr.ErrNotFound):
 		return apis.NewNotFoundError(apperr.ErrNotFound.Error(), nil)
