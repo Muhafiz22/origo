@@ -1,9 +1,14 @@
 import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 import { signup } from "../services/authServices";
+import { useAuth } from "../context/AuthContext";
+import { ApiError } from "../services/apiClient";
+import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
 
 function Signup() {
   const navigate = useNavigate();
+  const { emailAuth } = useAuth();
+  const handleApiError = useApiErrorHandler();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -19,16 +24,20 @@ function Signup() {
     setError(null);
 
     try {
-      await signup({
-        username,
-        email,
-        password,
-      });
-      navigate("/check-email", {
-        state: {email},
-      });
-    } catch (error) {
-      setError(error);
+      await signup({ username, email, password });
+
+      console.log("email auth: ", emailAuth)
+      if (emailAuth) {
+        navigate("/check-email", { state: { email } });
+      } else {
+        navigate("/login", { state: { email, registered: true } });
+      }
+    } catch (err) {
+      if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
+        setError(err.hasFields ? Object.values(err.fields)[0] : err.message);
+      } else {
+        handleApiError(err); // network failure / 5xx -> toast
+      }
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
 import { ApiError } from "../services/apiClient";
@@ -8,10 +8,12 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, emailAuth } = useAuth();
+  const location = useLocation();
 
-  const [identity, setIdentity] = useState("");
+  const [identity, setIdentity] = useState(location.state?.email ?? "");
   const [password, setPassword] = useState("");
+  const registered = location.state?.registered;
 
   const [showPassword, setShowPassword] = useState(null);
 
@@ -69,6 +71,12 @@ function Login() {
           onSubmit={handleSubmit}
           className="border border-base-300 bg-base-200 p-6 sm:p-8"
         >
+          {registered && !error && (
+            <div className="mb-6 border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
+              Account created. Please sign in.
+            </div>
+          )}
+
           {error && (
             <div className="mb-6 flex items-center gap-2 border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
               <XMarkIcon className="size-4" />
@@ -137,14 +145,16 @@ function Login() {
           </button>
         </form>
 
-        <div className="mt-4 flex justify-center">
-          <Link
-            to="/forgot-password"
-            className="text-sm items-center text-base-content transition-colors hover:text-primary"
-          >
-            Forgot password?
-          </Link>
-        </div>
+        {emailAuth && (
+          <div className="mt-4 flex justify-center">
+            <Link
+              to="/forgot-password"
+              className="text-sm items-center text-base-content transition-colors hover:text-primary"
+            >
+              Forgot password?
+            </Link>
+          </div>
+        )}
 
         <p className="mt-2 text-center text-sm text-base-content/60">
           Don't have an account?{" "}

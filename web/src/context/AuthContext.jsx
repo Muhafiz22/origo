@@ -10,8 +10,10 @@ import * as authServices from "../services/authServices";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
+  console.log("AuthProvider rendered");
   const [user, setUser] = useState(null);
   const [status, setStatus] = useState("loading");
+  const [emailAuth, setEmailAuth] = useState(null);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -25,8 +27,24 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    console.log("Fetching Auth Config...");
+    authServices
+      .getAuthConfig()
+      .then((cfg) => {
+        console.log("AUTH CONFIG:", cfg);
+        setEmailAuth(Boolean(cfg?.emailAuth));
+      })
+      .catch((err) => {
+        console.error("Failed to load auth config:", err);
+        setEmailAuth(false);
+      });
+  }, []);
+
+  useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  if (emailAuth == null) return null;
 
   const login = async (credentials) => {
     await authServices.login(credentials);
@@ -41,7 +59,7 @@ export function AuthProvider({ children }) {
   console.log("AUTH STATE:", { user, status });
 
   return (
-    <AuthContext.Provider value={{ user, status, login, logout }}>
+    <AuthContext.Provider value={{ user, status, emailAuth, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

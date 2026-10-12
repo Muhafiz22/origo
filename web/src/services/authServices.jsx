@@ -1,5 +1,13 @@
 import apiClient from "./apiClient";
 
+export function getCurrentUser() {
+  return apiClient("/auth/me");
+}
+
+export function getAuthConfig() {
+  return apiClient("/auth/config");
+}
+
 export function signup(credentials) {
   return apiClient("/auth/register", {
     method: "POST",
@@ -36,10 +44,6 @@ export function logout() {
   return apiClient("/auth/logout", {
     method: "POST",
   });
-}
-
-export function getCurrentUser() {
-  return apiClient("/auth/me");
 }
 
 export function forgotPassword(email) {

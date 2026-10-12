@@ -12,6 +12,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import EmailAuthRoute from "./components/EmailAuthRoute";
 import Dashboard from "./pages/Dashboard";
 import CourseWorkspace from "./pages/CourseWorkspace";
 import { CreateCourse } from "./components/CreateCourse";
@@ -27,12 +28,44 @@ function App() {
           <Routes>
             <Route element={<AppLayout />}>
               <Route path="/" element={<Home />} />
-              <Route path="/verify-email" element={<VerifyEmail />} />
-              <Route path="/check-email" element={<CheckEmail />} />
-              <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/login" element={<Login />} />
+
+              <Route
+                path="/verify-email"
+                element={
+                  <EmailAuthRoute>
+                    <VerifyEmail />
+                  </EmailAuthRoute>
+                }
+              ></Route>
+
+              <Route
+                path="/check-email"
+                element={
+                  <EmailAuthRoute>
+                    <CheckEmail />
+                  </EmailAuthRoute>
+                }
+              ></Route>
+
+              <Route
+                path="/forgot-password"
+                element={
+                  <EmailAuthRoute>
+                    <ForgotPassword />
+                  </EmailAuthRoute>
+                }
+              ></Route>
+
+              <Route
+                path="/reset-password"
+                element={
+                  <EmailAuthRoute>
+                    <ResetPassword />
+                  </EmailAuthRoute>
+                }
+              ></Route>
 
               <Route path="/courses" element={<Courses />} />
               <Route path="/courses/:courseId" element={<CourseDetails />} />
