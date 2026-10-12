@@ -10,7 +10,9 @@ import (
 	"backend/internal/user"
 	"backend/internal/video"
 	"fmt"
+	"log"
 	"os"
+	"strings"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
@@ -21,11 +23,31 @@ import (
 
 /* TODO:
 1. Password validation logic - uppercase, lowercase, numbers, special char check.
-2. setup SMTP service.
 */
+
+func corsOrigins() []string {
+	var origins []string
+	for _, o := range strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",") {
+		if o = strings.TrimSpace(o); o != "" {
+			origins = append(origins, o)
+		}
+	}
+	if len(origins) == 0 {
+		return []string{"http://localhost:5173"}
+	}
+	return origins
+}
 
 func main() {
 	fmt.Println("main started")
+
+	cfg, err := auth.LoadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	origins := corsOrigins()
+
 	app := pocketbase.New()
 	fmt.Println("app created")
 
@@ -33,7 +55,7 @@ func main() {
 		Automigrate: osutils.IsProbablyGoRun(),
 	})
 
-	authService := auth.NewService(app)
+	authService := auth.NewService(app, cfg)
 	authHandler := auth.NewHandler(authService)
 
 	userService := user.NewService(app)
@@ -54,8 +76,12 @@ func main() {
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
 		fmt.Println("on serve hook executed")
 
+		if err := cfg.ApplySMTP(se.App); err != nil {
+			return err
+		}
+
 		se.Router.Bind(apis.CORS(apis.CORSConfig{
-			AllowOrigins:     []string{"http://localhost:5173"},
+			AllowOrigins:     origins,
 			AllowCredentials: true,
 			AllowHeaders:     []string{"Content-Type"},
 		}))
@@ -65,12 +91,13 @@ func main() {
 		router.Register(
 			se.Router,
 			router.Dependencies{
-				Auth:    authHandler,
-				User:    userHandler,
-				Course:  courseHandler,
-				Chapter: chapterHandler,
-				Video:   videoHandler,
-				Note:    noteHandler,
+				AuthConfig: cfg,
+				Auth:       authHandler,
+				User:       userHandler,
+				Course:     courseHandler,
+				Chapter:    chapterHandler,
+				Video:      videoHandler,
+				Note:       noteHandler,
 			},
 		)
 
