@@ -15,12 +15,18 @@ import (
 
 type Service struct {
 	app core.App
+	cfg Config
 }
 
-func NewService(app core.App) *Service {
+func NewService(app core.App, cfg Config) *Service {
 	return &Service{
 		app: app,
+		cfg: cfg,
 	}
+}
+
+func (s *Service) isEmailAuthEnabled() bool {
+	return s.cfg.EmailAuthEnabled()
 }
 
 func (s *Service) authenticateMe(record *core.Record) UserProfileResponse {
@@ -37,8 +43,15 @@ func (s *Service) authenticateMe(record *core.Record) UserProfileResponse {
 func (s *Service) registerUser(req RegisterRequest) (RegisterResponse, error) {
 	record, err := s.app.FindAuthRecordByEmail("users", req.Email)
 
-	if err == nil {
-		if record.Verified() {
+	if err == nil { //user exists
+		if !s.cfg.EmailAuthEnabled() { //return error
+			return RegisterResponse{}, apperr.FromValidationErrors(map[string]error{
+				"email": errors.New("email is already registered"),
+			})
+		}
+
+		// mode == "email"
+		if record.Verified() { //already verified - return error
 			return RegisterResponse{}, apperr.FromValidationErrors(map[string]error{
 				"email": errors.New("email is already registered"),
 			})
@@ -47,8 +60,7 @@ func (s *Service) registerUser(req RegisterRequest) (RegisterResponse, error) {
 		// Unverified account: the latest signup wins.
 		record.Set("name", req.Username)
 		record.SetPassword(req.Password)
-		// Invalidate any verification link issued for the previous signup.
-		record.RefreshTokenKey()
+		record.RefreshTokenKey() //invalidate any prev link issued
 
 		if err := s.app.Save(record); err != nil {
 			return RegisterResponse{}, mapSaveError(err)
@@ -56,6 +68,8 @@ func (s *Service) registerUser(req RegisterRequest) (RegisterResponse, error) {
 
 		return s.sendVerification(record), nil
 	}
+
+	//new user registration
 
 	if !errors.Is(err, sql.ErrNoRows) {
 		s.app.Logger().Error(
@@ -76,8 +90,19 @@ func (s *Service) registerUser(req RegisterRequest) (RegisterResponse, error) {
 	record.Set("email", req.Email)
 	record.SetPassword(req.Password)
 
+	if !s.cfg.EmailAuthEnabled() {
+		record.SetVerified(true)
+	}
+
 	if err := s.app.Save(record); err != nil {
 		return RegisterResponse{}, mapSaveError(err)
+	}
+
+	if !s.cfg.EmailAuthEnabled() {
+		return RegisterResponse{
+			UserId:           record.Id,
+			VerificationSent: false,
+		}, nil
 	}
 
 	return s.sendVerification(record), nil

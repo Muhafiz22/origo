@@ -14,18 +14,19 @@ import (
 )
 
 type Dependencies struct {
-	Auth    *auth.Handler
-	User    *user.Handler
-	Course  *course.Handler
-	Chapter *chapter.Handler
-	Video   *video.Handler
-	Note    *note.Handler
+	AuthConfig auth.Config
+	Auth       *auth.Handler
+	User       *user.Handler
+	Course     *course.Handler
+	Chapter    *chapter.Handler
+	Video      *video.Handler
+	Note       *note.Handler
 }
 
 func Register(r *pocketRouter.Router[*core.RequestEvent], d Dependencies) {
 	health.RegisterRoutes(r)
 
-	auth.RegisterRoutes(r, d.Auth)
+	auth.RegisterRoutes(r, d.Auth, d.AuthConfig)
 
 	user.RegisterRoutes(r, d.User)
 	course.RegisterRoutes(r, d.Course)

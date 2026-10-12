@@ -19,6 +19,12 @@ func NewHandler(service *Service) *Handler {
 	}
 }
 
+func (h *Handler) authConfigHandler(e *core.RequestEvent) error {
+	return e.JSON(http.StatusOK, map[string]bool{
+		"emailAuth": h.service.isEmailAuthEnabled(),
+	})
+}
+
 func (h *Handler) authenticateMeHandler(e *core.RequestEvent) error {
 	user := e.Auth
 	response := h.service.authenticateMe(user)
