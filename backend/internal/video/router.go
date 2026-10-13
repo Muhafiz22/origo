@@ -20,4 +20,8 @@ func RegisterRoutes(r *pocketRouter.Router[*core.RequestEvent], h *Handler) {
 	videos.PATCH("/{videoId}", h.updateVideoHandler).Bind(apis.RequireAuth("users"))
 	videos.DELETE("/{videoId}", h.deleteVideoHandler).Bind(apis.RequireAuth("users"))
 	videos.GET("/{videoId}/content", h.getVideoContentHandler).Bind(apis.RequireAuth("users"))
+
+	r.GET("/courses/{courseId}/progress", h.getCourseProgressHandler).Bind(apis.RequireAuth("users"))
+	videos.PUT("/{videoId}/progress", h.markVideoDoneHandler).Bind(apis.RequireAuth("users"))
+	videos.DELETE("/{videoId}/progress", h.unmarkVideoDoneHandler).Bind(apis.RequireAuth("users"))
 }

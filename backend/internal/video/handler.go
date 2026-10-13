@@ -147,3 +147,38 @@ func (h *Handler) getChapterVideosHandler(e *core.RequestEvent) error {
 
 	return e.JSON(http.StatusOK, response)
 }
+
+func (h *Handler) markVideoDoneHandler(e *core.RequestEvent) error {
+	userId := e.Auth.Id
+	videoId := e.Request.PathValue("videoId")
+
+	if err := h.service.markVideoDone(videoId, userId); err != nil {
+		return apis.MapError(err)
+	}
+
+	return e.NoContent(http.StatusNoContent)
+
+}
+
+func (h *Handler) unmarkVideoDoneHandler(e *core.RequestEvent) error {
+	userId := e.Auth.Id
+	videoId := e.Request.PathValue("videoId")
+
+	if err := h.service.unmarkVideoDone(videoId, userId); err != nil {
+		return apis.MapError(err)
+	}
+
+	return e.NoContent(http.StatusNoContent)
+}
+
+func (h *Handler) getCourseProgressHandler(e *core.RequestEvent) error {
+	userId := e.Auth.Id
+	courseId := e.Request.PathValue("courseId")
+
+	progress, err := h.service.getCourseProgress(userId, courseId)
+	if err != nil {
+		return apis.MapError(err)
+	}
+
+	return e.JSON(http.StatusOK, progress)
+}

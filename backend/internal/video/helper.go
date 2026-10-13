@@ -142,10 +142,35 @@ func (s *Service) canAccessVideo(videoRecord *core.Record) error {
 		return err
 	}
 
-	price := courseRecord.GetFloat("price")
-	if price > 0 {
+	return s.canAccessCourse(courseRecord)
+}
+
+func (s *Service) canAccessCourse(courseRecord *core.Record) error {
+	if courseRecord.GetFloat("price") > 0 {
 		return apperr.ErrForbidden
 	}
-
 	return nil
+}
+
+func (s *Service) findVideoProgress(
+	userId string,
+	videoId string,
+) (*core.Record, error) {
+	record, err := s.app.FindFirstRecordByFilter(
+		"video_progress",
+		"user = {:userId} && video = {:videoId}",
+		map[string]any{
+			"userId":  userId,
+			"videoId": videoId,
+		},
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, apperr.ErrNotFound
+		}
+
+		return nil, err
+	}
+
+	return record, nil
 }
