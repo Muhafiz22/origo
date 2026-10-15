@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { getVideoContent } from "../services/videoServices";
 
-function VideoPlayer({ 
+function VideoPlayer({
   chapterNumber,
   videoNumber,
-  video, 
-  onPrevious, 
+  video,
+  onPrevious,
   previousVideo,
   onNext,
-  nextVideo
+  nextVideo,
 }) {
   const [videoUrl, setVideoUrl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -83,7 +83,7 @@ function VideoPlayer({
       )}
 
       {video && (
-        <div className="mt-6 grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-6 border-t border-base-300 pt-6">
+        <div className="mt-2 grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-6 border-t border-base-300 pt-6">
           <button
             type="button"
             onClick={onPrevious}
@@ -99,7 +99,7 @@ function VideoPlayer({
                 Ch {chapterNumber} · Vid {videoNumber}
               </span>
             )}
-              <span className="block sm:inline">{video.title}</span>
+            <span className="block sm:inline">{video.title}</span>
           </div>
 
           <button

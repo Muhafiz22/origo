@@ -2,11 +2,15 @@ import { useState } from "react";
 import { useParams } from "react-router";
 import useCourseWithChapters from "../hooks/useCourseWithChapters";
 import useCourseProgress from "../hooks/useCourseProgress";
-import { useAuth } from "../context/AuthContext"; 
+import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/ToastProvider";
-import CourseHero from "../components/CourseHero";
-import LearningArea from "../components/LearningArea";
+import VideoPlayer from "../components/VideoPlayer";
+import CourseTree from "../components/CourseTree";
+import ProgressCard from "../components/ProgressCard";
 import CourseInformation from "../components/CourseInformation";
+
+const SECTION_GRID =
+  "grid gap-4 lg:h-[calc(100vh-10rem)] lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]";
 
 function progressErrorMessage(error) {
   if (error?.isNetwork) {
@@ -26,7 +30,7 @@ function progressErrorMessage(error) {
   }
 }
 
-function CourseDetails() {
+export default function CourseDetails() {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const { courseId } = useParams();
   const { course, chapters, loading, error } = useCourseWithChapters(courseId);
@@ -38,6 +42,12 @@ function CourseDetails() {
     status === "authenticated",
     (err) => toast.error(progressErrorMessage(err)),
   );
+
+  const showProgress =
+    Boolean(progress) &&
+    !progress.unavailable &&
+    progress.completedIds != null &&
+    progress.totalVideos > 0;
 
   const allVideos = chapters.flatMap((chapter) => chapter.videos ?? []);
 
@@ -128,40 +138,52 @@ function CourseDetails() {
       </main>
     );
   }
-
   return (
     <main className="mx-auto px-4 py-4 lg:px-4">
-      <CourseHero
-        course={course}
-        chapterCount={chapters.length}
-        progress={{
-          loading: progress.loading,
-          unavailable: progress.unavailable,
-          percent: progress.percent,
-          totalVideos: progress.totalVideos,
-          completedIds: progress.completedIds,
-          videoIds: allVideos.map((video) => video.id),
-        }}
-      />
+      <section className={SECTION_GRID}>
+        <div className="min-w-0 min-h-0">
+          <VideoPlayer
+            chapterNumber={chapterNumber}
+            videoNumber={videoNumber}
+            video={activeVideo}
+            onPrevious={handlePreviousVideo}
+            previousVideo={previousVideo}
+            onNext={handleNextVideo}
+            nextVideo={nextVideo}
+          />
+        </div>
 
-      <LearningArea
-        chapters={chapters}
-        activeVideo={activeVideo}
-        chapterNumber={chapterNumber}
-        videoNumber={videoNumber}
-        previousVideo={previousVideo}
-        nextVideo={nextVideo}
-        onVideoSelect={handleVideoSelect}
-        onPrevious={handlePreviousVideo}
-        onNext={handleNextVideo}
-        progressUnavailable={progress.unavailable}
-        isVideoDone={progress.isDone}
-        onToggleVideoDone={progress.toggleVideo}
-      />
+        <div className="grid min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-4">
+          {showProgress && (
+            <ProgressCard
+              course={course}
+              chapterCount={chapters.length}
+              percent={progress.percent}
+              totalVideos={progress.totalVideos}
+              completedIds={progress.completedIds}
+              videoIds={allVideos.map((video) => video.id)}
+            />
+          )}
 
-      <CourseInformation course={course} />
+          <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-base-300 bg-base-100">
+            <h2 className="shrink-0 border-b border-base-300 px-3 py-3 text-center font-mono text-xs uppercase tracking-[0.2em] text-base-content/60">
+              Contents
+            </h2>
+
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <CourseTree
+                chapters={chapters}
+                onVideoSelect={handleVideoSelect}
+                progressUnavailable={progress.unavailable}
+                isVideoDone={progress.isDone}
+                onToggleVideoDone={progress.toggleVideo}
+              />
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <CourseInformation course={course} chapterCount={chapters.length} />
     </main>
   );
 }
-
-export default CourseDetails;
