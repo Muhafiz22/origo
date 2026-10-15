@@ -14,6 +14,9 @@ function LearningArea({
   onVideoSelect,
   onPrevious,
   onNext,
+  progressUnavailable,
+  isVideoDone,
+  onToggleVideoDone,
 }) {
   return (
     <section className={`mt-4 ${SECTION_GRID}`}>
@@ -45,7 +48,9 @@ function LearningArea({
             <CourseTree
               chapters={chapters}
               onVideoSelect={onVideoSelect}
-              selectedVideoId={activeVideo?.id}
+              progressUnavailable={progressUnavailable}
+              isVideoDone={isVideoDone}
+              onToggleVideoDone={onToggleVideoDone}
             />
           </div>
         </div>

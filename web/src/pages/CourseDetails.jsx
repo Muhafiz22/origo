@@ -1,14 +1,43 @@
 import { useState } from "react";
 import { useParams } from "react-router";
 import useCourseWithChapters from "../hooks/useCourseWithChapters";
+import useCourseProgress from "../hooks/useCourseProgress";
+import { useAuth } from "../context/AuthContext"; 
+import { useToast } from "../components/ToastProvider";
 import CourseHero from "../components/CourseHero";
 import LearningArea from "../components/LearningArea";
 import CourseInformation from "../components/CourseInformation";
+
+function progressErrorMessage(error) {
+  if (error?.isNetwork) {
+    return "Unable to reach the server. Check your connection.";
+  }
+  switch (error?.status) {
+    case 401:
+      return "Your session has expired. Sign in again to save progress.";
+    case 403:
+      return "You don't have access to this course's progress.";
+    case 404:
+      return "This video no longer exists.";
+    default:
+      return error?.isServer
+        ? "Something went wrong on our end. Try again in a moment."
+        : "Couldn't update progress. Try again.";
+  }
+}
 
 function CourseDetails() {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const { courseId } = useParams();
   const { course, chapters, loading, error } = useCourseWithChapters(courseId);
+
+  const { status } = useAuth();
+  const toast = useToast();
+  const progress = useCourseProgress(
+    courseId,
+    status === "authenticated",
+    (err) => toast.error(progressErrorMessage(err)),
+  );
 
   const allVideos = chapters.flatMap((chapter) => chapter.videos ?? []);
 
@@ -25,11 +54,9 @@ function CourseDetails() {
       ? allVideos[currentIndex + 1]
       : null;
 
-
   const currentChapterIndex = chapters.findIndex((chapter) =>
     chapter.videos?.some((video) => video.id === activeVideo?.id),
   );
-
 
   const currentVideoIndex =
     currentChapterIndex >= 0
@@ -38,12 +65,10 @@ function CourseDetails() {
         )
       : -1;
 
-
   const chapterNumber =
     currentChapterIndex >= 0 ? currentChapterIndex + 1 : null;
 
-  const videoNumber =
-    currentVideoIndex >= 0 ? currentVideoIndex + 1 : null;
+  const videoNumber = currentVideoIndex >= 0 ? currentVideoIndex + 1 : null;
 
   function handleVideoSelect(video) {
     setSelectedVideo(video);
@@ -106,7 +131,18 @@ function CourseDetails() {
 
   return (
     <main className="mx-auto px-4 py-4 lg:px-4">
-      <CourseHero course={course} chapterCount={chapters.length} />
+      <CourseHero
+        course={course}
+        chapterCount={chapters.length}
+        progress={{
+          loading: progress.loading,
+          unavailable: progress.unavailable,
+          percent: progress.percent,
+          totalVideos: progress.totalVideos,
+          completedIds: progress.completedIds,
+          videoIds: allVideos.map((video) => video.id),
+        }}
+      />
 
       <LearningArea
         chapters={chapters}
@@ -118,9 +154,12 @@ function CourseDetails() {
         onVideoSelect={handleVideoSelect}
         onPrevious={handlePreviousVideo}
         onNext={handleNextVideo}
+        progressUnavailable={progress.unavailable}
+        isVideoDone={progress.isDone}
+        onToggleVideoDone={progress.toggleVideo}
       />
 
-      <CourseInformation course={course}/>
+      <CourseInformation course={course} />
     </main>
   );
 }

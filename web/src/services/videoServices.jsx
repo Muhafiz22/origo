@@ -42,3 +42,19 @@ export async function getVideoContent(videoId) {
 
   return response.blob();
 }
+
+export async function markVideoDone(videoId) {
+  return apiClient(`/videos/${videoId}/progress`, {
+    method: "PUT",
+  });
+}
+
+export async function unmarkVideoDone(videoId) {
+  return apiClient(`/videos/${videoId}/progress`, {
+    method: "DELETE",
+  });
+}
+
+export async function getCourseProgress(courseId) {
+  return apiClient(`/courses/${courseId}/progress`);
+}

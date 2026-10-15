@@ -1,173 +1,169 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { useParams } from "react-router";
+import useCourseWithChapters from "../hooks/useCourseWithChapters";
+import useCourseProgress from "../hooks/useCourseProgress";
 import { useAuth } from "../context/AuthContext";
-import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
-import { ApiError } from "../services/apiClient";
-import { XMarkIcon } from "@heroicons/react/24/solid";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useToast } from "../components/ToastProvider";
+import CourseHero from "../components/CourseHero";
+import LearningArea from "../components/LearningArea";
+import CourseInformation from "../components/CourseInformation";
 
-function Login() {
-  const navigate = useNavigate();
-  const { login, emailAuth } = useAuth();
-  const location = useLocation();
+function progressErrorMessage(error) {
+  if (error?.isNetwork) {
+    return "Unable to reach the server. Check your connection.";
+  }
+  switch (error?.status) {
+    case 401:
+      return "Your session has expired. Sign in again to save progress.";
+    case 403:
+      return "You don't have access to this course's progress.";
+    case 404:
+      return "This video no longer exists.";
+    default:
+      return error?.isServer
+        ? "Something went wrong on our end. Try again in a moment."
+        : "Couldn't update progress. Try again.";
+  }
+}
 
-  const [identity, setIdentity] = useState(location.state?.email ?? "");
-  const [password, setPassword] = useState("");
-  const registered = location.state?.registered;
+function CourseDetails() {
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const { courseId } = useParams();
+  const { course, chapters, loading, error } = useCourseWithChapters(courseId);
 
-  const [showPassword, setShowPassword] = useState(null);
+  const { status } = useAuth();
+  const toast = useToast();
+  const progress = useCourseProgress(
+    courseId,
+    status === "authenticated",
+    (err) => toast.error(progressErrorMessage(err)),
+  );
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const handleApiError = useApiErrorHandler();
+  const allVideos = chapters.flatMap((chapter) => chapter.videos ?? []);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  const activeVideo = selectedVideo ?? allVideos[0] ?? null;
 
-    setLoading(true);
-    setError(null);
+  const currentIndex = allVideos.findIndex(
+    (video) => video.id === activeVideo?.id,
+  );
 
-    try {
-      await login({
-        identity,
-        password,
-      });
-      navigate("/");
-    } catch (err) {
-      if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
-        if (err.hasFields) {
-          setError(Object.values(err.fields)[0]); // e.g. "email cannot be empty"
-        } else if (err.status === 400 || err.status === 401) {
-          setError("Incorrect email or password.");
-        } else {
-          setError(err.message);
-        }
-      } else {
-        handleApiError(err); // network failure / 5xx -> toast
-      }
-    } finally {
-      setLoading(false);
-    }
+  const previousVideo = currentIndex > 0 ? allVideos[currentIndex - 1] : null;
+
+  const nextVideo =
+    currentIndex >= 0 && currentIndex < allVideos.length - 1
+      ? allVideos[currentIndex + 1]
+      : null;
+
+  const currentChapterIndex = chapters.findIndex((chapter) =>
+    chapter.videos?.some((video) => video.id === activeVideo?.id),
+  );
+
+  const currentVideoIndex =
+    currentChapterIndex >= 0
+      ? chapters[currentChapterIndex].videos.findIndex(
+          (video) => video.id === activeVideo?.id,
+        )
+      : -1;
+
+  const chapterNumber =
+    currentChapterIndex >= 0 ? currentChapterIndex + 1 : null;
+
+  const videoNumber = currentVideoIndex >= 0 ? currentVideoIndex + 1 : null;
+
+  function handleVideoSelect(video) {
+    setSelectedVideo(video);
+  }
+
+  function handlePreviousVideo() {
+    if (previousVideo) setSelectedVideo(previousVideo);
+  }
+
+  function handleNextVideo() {
+    if (nextVideo) setSelectedVideo(nextVideo);
+  }
+
+  if (loading) {
+    return (
+      <main className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <div className="animate-pulse space-y-6">
+          <div className="h-3 w-20 rounded bg-base-300" />
+          <div className="h-12 w-3/4 rounded bg-base-300" />
+          <div className="h-5 w-full max-w-2xl rounded bg-base-300" />
+          <div className="h-5 w-2/3 max-w-2xl rounded bg-base-300" />
+        </div>
+      </main>
+    );
+  }
+
+  if (error?.status === 404) {
+    return (
+      <main className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
+          Course
+        </p>
+
+        <h1 className="mt-4 font-display text-4xl font-semibold tracking-tight">
+          Course not found
+        </h1>
+
+        <p className="mt-4 text-base-content/60">
+          The course you're looking for doesn't exist or is no longer available.
+        </p>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-error">
+          Error
+        </p>
+
+        <h1 className="mt-4 font-display text-4xl font-semibold tracking-tight">
+          Something went wrong
+        </h1>
+
+        <p className="mt-4 text-base-content/60">{error.message}</p>
+      </main>
+    );
   }
 
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-81px)] max-w-7xl items-center justify-center px-6 py-16 lg:px-8">
-      <section className="w-full max-w-md">
-        <div className="mb-10">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
-            Welcome back
-          </p>
+    <main className="mx-auto px-4 py-4 lg:px-4">
+      <CourseHero
+        course={course}
+        chapterCount={chapters.length}
+        status={status}
+        progress={{
+          loading: progress.loading,
+          unavailable: progress.unavailable,
+          percent: progress.percent,
+          totalVideos: progress.totalVideos,
+          completedIds: progress.completedIds,
+          videoIds: allVideos.map((video) => video.id),
+        }}
+      />
 
-          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
-            Log in
-          </h1>
+      <LearningArea
+        chapters={chapters}
+        activeVideo={activeVideo}
+        chapterNumber={chapterNumber}
+        videoNumber={videoNumber}
+        previousVideo={previousVideo}
+        nextVideo={nextVideo}
+        onVideoSelect={handleVideoSelect}
+        onPrevious={handlePreviousVideo}
+        onNext={handleNextVideo}
+        progressUnavailable={progress.unavailable}
+        isVideoDone={progress.isDone}
+        isVideoPending={progress.isPending}
+        onToggleVideoDone={progress.toggleVideo}
+      />
 
-          <p className="mt-4 text-base leading-relaxed text-base-content/65">
-            Continue where you left off.
-          </p>
-        </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="border border-base-300 bg-base-200 p-6 sm:p-8"
-        >
-          {registered && !error && (
-            <div className="mb-6 border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
-              Account created. Please sign in.
-            </div>
-          )}
-
-          {error && (
-            <div className="mb-6 flex items-center gap-2 border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
-              <XMarkIcon className="size-4" />
-              {error}
-            </div>
-          )}
-
-          <div className="space-y-5">
-            <div>
-              <label
-                htmlFor="identity"
-                className="mb-2 block font-mono text-xs uppercase tracking-[0.15em] text-base-content/70"
-              >
-                Email
-              </label>
-
-              <input
-                id="identity"
-                type="email"
-                autoComplete="username"
-                value={identity}
-                onChange={(event) => setIdentity(event.target.value)}
-                className="input w-full rounded-none border-base-300 bg-base-100 focus:border-accent focus:outline-none"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="password"
-                className="mb-2 block font-mono text-xs uppercase tracking-[0.15em] text-base-content/70"
-              >
-                Password
-              </label>
-
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  className="input w-full rounded-none border-base-300 bg-base-100 pr-10 focus:border-accent focus:outline-none"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-3 flex items-center text-base-content/50 hover:text-base-content"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeSlashIcon className="size-5" />
-                  ) : (
-                    <EyeIcon className="size-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn mt-7 w-full rounded-none border-none bg-primary font-mono text-sm text-primary-content hover:bg-primary/90"
-          >
-            {loading ? "Logging in..." : "Log in"}
-          </button>
-        </form>
-
-        {emailAuth && (
-          <div className="mt-4 flex justify-center">
-            <Link
-              to="/forgot-password"
-              className="text-sm items-center text-base-content transition-colors hover:text-primary"
-            >
-              Forgot password?
-            </Link>
-          </div>
-        )}
-
-        <p className="mt-2 text-center text-sm text-base-content/60">
-          Don't have an account?{" "}
-          <Link
-            to="/signup"
-            className="font-medium text-base-content transition-colors hover:text-primary"
-          >
-            Sign up
-          </Link>
-        </p>
-      </section>
+      <CourseInformation course={course} />
     </main>
   );
 }
 
-export default Login;
+export default CourseDetails;

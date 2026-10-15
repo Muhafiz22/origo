@@ -15,6 +15,9 @@ function CourseTree({
   onAddVideo,
   onEditVideo,
   onDeleteVideo,
+  progressUnavailable,
+  isVideoDone,
+  onToggleVideoDone,
   onAddNote,
   onEditNote,
   onDeleteNote,
@@ -23,6 +26,12 @@ function CourseTree({
   const [noteError, setNoteError] = useState(null)
   const selectedRowRef = useRef(null);
   const pendingScrollRef = useRef(false);
+
+  const showProgress =
+  mode === "learner" &&
+  !progressUnavailable &&
+  Boolean(isVideoDone) &&
+  Boolean(onToggleVideoDone);
 
   function toggleChapter(chapterId) {
     setExpandedChapters((current) => {
@@ -85,7 +94,12 @@ function CourseTree({
     <div>
       {chapters.map((chapter, index) => {
         const isExpanded = expandedChapters.has(chapter.id);
-
+        const videos = chapter.videos ?? [];
+        const doneCount = showProgress
+          ? videos.filter((video) => isVideoDone(video.id)).length
+          : 0;
+        const chapterDone = videos.length > 0 && doneCount === videos.length;
+        
         return (
           <article key={chapter.id}>
             <div className="group flex w-full items-center gap-3 px-4 py-5 hover:bg-base-200/50">
@@ -109,6 +123,17 @@ function CourseTree({
                 <span className="font-display text-lg font-semibold">
                   {chapter.title}
                 </span>
+
+                {showProgress && videos.length > 0 && (
+                  <span
+                    className={`ml-auto pr-2 font-mono text-xs ${
+                      chapterDone ? "text-success" : "text-base-content/50"
+                    }`}
+                  >
+                    {chapterDone && " ✓ "}
+                    {doneCount}/{videos.length}
+                  </span>
+                )}
               </button>
 
               {mode === "editor" && (
@@ -144,6 +169,16 @@ function CourseTree({
                         ref={isSelected ? selectedRowRef : null}
                         className="group flex items-center gap-2"
                       >
+                        {showProgress && (
+                          <input
+                            type="checkbox"
+                            checked={isVideoDone(video.id)}
+                            onChange={() => onToggleVideoDone(video.id)}
+                            aria-label={`Mark ${video.title} as done`}
+                            className="checkbox checkbox-sm checkbox-success shrink-0"
+                          />
+                        )}
+
                         <PlayIcon 
                         className={`size-4 shrink-0 ${
                           isSelected ? "text-accent" : "text-base-content/40"
@@ -174,6 +209,12 @@ function CourseTree({
                     );
                   })}
 
+                  {noteError && (
+                    <p className="px-3 py-2 text-sm text-error">
+                      {noteError}
+                    </p>
+                  )}
+
                   {(chapter.notes ?? []).map((note) => (
                     <div
                       key={note.id}
@@ -188,12 +229,6 @@ function CourseTree({
                       >
                         {note.title}
                       </button>
-
-                      {noteError && (
-                        <p className="px-3 py-2 text-sm text-error">
-                          {noteError}
-                        </p>
-                      )}
 
                       {mode === "editor" && (
                         <ActionMenu
