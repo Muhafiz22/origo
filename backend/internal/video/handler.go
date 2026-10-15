@@ -99,6 +99,7 @@ func (h *Handler) getVideoContentHandler(e *core.RequestEvent) error {
 	filename := videoRecord.GetString("video")
 	filePath := videoRecord.BaseFilesPath() + "/" + filename
 
+	e.Response.Header().Set("Cache-Control", "private, no-store")
 	return fsys.Serve(
 		e.Response,
 		e.Request,

@@ -4,6 +4,20 @@ import { PlayIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ActionMenu from "./ActionMenu";
 import { getNoteContent } from "../services/noteServices";
+import { useToast } from "./ToastProvider";
+
+function noteErrorMessage(error, note) {
+  switch (error?.status) {
+    case 401:
+      return "Sign in to open notes.";
+    case 403:
+      return "This is a paid course. Purchase the course to open its notes.";
+    default:
+      return error?.isNetwork
+        ? "Unable to reach the server. Check your connection."
+        : `Failed to open ${note.title}`;
+  }
+}
 
 function CourseTree({
   chapters,
@@ -23,15 +37,15 @@ function CourseTree({
   onDeleteNote,
 }) {
   const [expandedChapters, setExpandedChapters] = useState(new Set());
-  const [noteError, setNoteError] = useState(null)
   const selectedRowRef = useRef(null);
   const pendingScrollRef = useRef(false);
+  const toast = useToast();
 
   const showProgress =
-  mode === "learner" &&
-  !progressUnavailable &&
-  Boolean(isVideoDone) &&
-  Boolean(onToggleVideoDone);
+    mode === "learner" &&
+    !progressUnavailable &&
+    Boolean(isVideoDone) &&
+    Boolean(onToggleVideoDone);
 
   function toggleChapter(chapterId) {
     setExpandedChapters((current) => {
@@ -69,7 +83,6 @@ function CourseTree({
     });
   }, [selectedVideoId, chapters]);
 
-
   useEffect(() => {
     if (!pendingScrollRef.current || !selectedRowRef.current) {
       return;
@@ -79,14 +92,22 @@ function CourseTree({
     pendingScrollRef.current = false;
   }, [selectedVideoId, expandedChapters]);
 
-  async function handleOpenNote(note){
-    try{
-      const blob = await getNoteContent(note.id)
-      const url = URL.createObjectURL(blob)
+  async function handleOpenNote(note) {
+    try {
+      const blob = await getNoteContent(note.id);
+      const url = URL.createObjectURL(blob);
 
-      window.open(url, "_blank")
-    }catch(error){
-      setNoteError(`failed to open ${note.title}`)
+      const tab = window.open(url, "_blank");
+
+      if (!tab) {
+        URL.revokeObjectURL(url);
+        toast.error("Your browser blocked the new tab. Allow popups and try again.");
+        return;
+      }
+
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (err) {
+      toast.error(noteErrorMessage(err, note));
     }
   }
 
@@ -99,7 +120,7 @@ function CourseTree({
           ? videos.filter((video) => isVideoDone(video.id)).length
           : 0;
         const chapterDone = videos.length > 0 && doneCount === videos.length;
-        
+
         return (
           <article key={chapter.id}>
             <div className="group flex w-full items-center gap-3 px-4 py-5 hover:bg-base-200/50">
@@ -110,10 +131,11 @@ function CourseTree({
                 className="flex flex-1 items-center gap-3 text-left transition-colors"
               >
                 <span className="w-4 font-mono text-xs text-accent">
-                  {isExpanded 
-                    ? <ChevronDownIcon className="size-5" />
-                    : <ChevronRightIcon className="size-5" />
-                  }
+                  {isExpanded ? (
+                    <ChevronDownIcon className="size-5" />
+                  ) : (
+                    <ChevronRightIcon className="size-5" />
+                  )}
                 </span>
 
                 <span className="w-6 font-mono text-base-content/60">
@@ -179,9 +201,9 @@ function CourseTree({
                           />
                         )}
 
-                        <PlayIcon 
-                        className={`size-4 shrink-0 ${
-                          isSelected ? "text-accent" : "text-base-content/40"
+                        <PlayIcon
+                          className={`size-4 shrink-0 ${
+                            isSelected ? "text-accent" : "text-base-content/40"
                           }`}
                         />
 
@@ -208,12 +230,6 @@ function CourseTree({
                       </div>
                     );
                   })}
-
-                  {noteError && (
-                    <p className="px-3 py-2 text-sm text-error">
-                      {noteError}
-                    </p>
-                  )}
 
                   {(chapter.notes ?? []).map((note) => (
                     <div

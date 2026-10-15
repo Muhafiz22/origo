@@ -174,6 +174,7 @@ export default function CourseDetails() {
               <CourseTree
                 chapters={chapters}
                 onVideoSelect={handleVideoSelect}
+                selectedVideoId={activeVideo?.id}
                 progressUnavailable={progress.unavailable}
                 isVideoDone={progress.isDone}
                 onToggleVideoDone={progress.toggleVideo}

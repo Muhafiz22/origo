@@ -1,5 +1,17 @@
 import { useState, useEffect } from "react";
 import { getVideoContent } from "../services/videoServices";
+import { Link, useLocation } from "react-router";
+
+function videoErrorMessage(error) {
+  switch (error?.status) {
+    case 401:
+      return "Sign in to watch this lesson.";
+    case 403:
+      return "This is a paid course. Purchase the course to access its contents.";
+    default:
+      return "Unable to load this video";
+  }
+}
 
 function VideoPlayer({
   chapterNumber,
@@ -14,39 +26,43 @@ function VideoPlayer({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const location = useLocation();
+
   useEffect(() => {
-    if (!video) {
+  if (!video) {
+    setVideoUrl(null);
+    return;
+  }
+
+  let cancelled = false;
+  let objectUrl = null;
+
+  async function loadVideo() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const blob = await getVideoContent(video.id);
+      if (cancelled) return;
+
+      objectUrl = URL.createObjectURL(blob);
+      setVideoUrl(objectUrl);
+    } catch (err) {
+      if (cancelled) return;
+      setError(err);
       setVideoUrl(null);
-      return;
+    } finally {
+      if (!cancelled) setLoading(false);
     }
+  }
 
-    let objectUrl = null;
+  loadVideo();
 
-    async function loadVideo() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const blob = await getVideoContent(video.id);
-        objectUrl = URL.createObjectURL(blob);
-
-        setVideoUrl(objectUrl);
-      } catch (error) {
-        setError(error);
-        setVideoUrl(null);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadVideo();
-
-    return () => {
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [video]);
-
+  return () => {
+    cancelled = true;
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+  };
+}, [video]);
   return (
     <div>
       {!video && (
@@ -64,13 +80,19 @@ function VideoPlayer({
       )}
 
       {video && error && (
-        <div className="flex aspect-video items-center justify-center rounded-lg bg-base-200">
-          <p className="text-error font-semibold">
-            {error.status === 403
-              ? "This is a paid Course. Purchase the course to access it's contents."
-              : "Unable to load this video"}
-          </p>
-        </div>
+        <div className="flex aspect-video flex-col items-center justify-center gap-3 rounded-lg bg-base-200 px-4 text-center">
+        <p className="font-semibold text-error">{videoErrorMessage(error)}</p>
+
+        {error.status === 401 && (
+          <Link
+            to="/login"
+            state={{ from: location.pathname + location.search }}
+            className="btn btn-primary btn-sm"
+          >
+            Sign in
+          </Link>
+        )}
+      </div>
       )}
 
       {video && videoUrl && !loading && !error && (

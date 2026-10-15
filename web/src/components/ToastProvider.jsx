@@ -45,7 +45,7 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={toast}>
       {children}
-      <div className="toast toast-top toast-end z-50">
+      <div className="toast toast-top toast-center z-50">
         {toasts.map((t) => (
           <div
             key={t.id}

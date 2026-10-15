@@ -10,6 +10,7 @@ function Login() {
   const navigate = useNavigate();
   const { login, emailAuth } = useAuth();
   const location = useLocation();
+  const from = location.state?.from ?? "/";
 
   const [identity, setIdentity] = useState(location.state?.email ?? "");
   const [password, setPassword] = useState("");
@@ -32,7 +33,7 @@ function Login() {
         identity,
         password,
       });
-      navigate("/");
+      navigate(from, { replace: true });
     } catch (err) {
       if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
         if (err.hasFields) {
