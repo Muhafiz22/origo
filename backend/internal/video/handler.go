@@ -152,7 +152,7 @@ func (h *Handler) markVideoDoneHandler(e *core.RequestEvent) error {
 	userId := e.Auth.Id
 	videoId := e.Request.PathValue("videoId")
 
-	if err := h.service.markVideoDone(videoId, userId); err != nil {
+	if err := h.service.markVideoDone(userId, videoId); err != nil {
 		return apis.MapError(err)
 	}
 
@@ -164,7 +164,7 @@ func (h *Handler) unmarkVideoDoneHandler(e *core.RequestEvent) error {
 	userId := e.Auth.Id
 	videoId := e.Request.PathValue("videoId")
 
-	if err := h.service.unmarkVideoDone(videoId, userId); err != nil {
+	if err := h.service.unmarkVideoDone(userId, videoId); err != nil {
 		return apis.MapError(err)
 	}
 

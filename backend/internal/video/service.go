@@ -204,7 +204,7 @@ func (s *Service) getChapterVideos(chapterId string) ([]VideoMetadataResponse, e
 	return response, nil
 }
 
-func (s *Service) markVideoDone(videoId, userId string) error {
+func (s *Service) markVideoDone(userId, videoId string) error {
 	videoRecord, err := s.isValidVideo(videoId)
 	if err != nil {
 		return err
@@ -274,7 +274,7 @@ func (s *Service) markVideoDone(videoId, userId string) error {
 	return nil
 }
 
-func (s *Service) unmarkVideoDone(videoId, userId string) error {
+func (s *Service) unmarkVideoDone(userId, videoId string) error {
 	videoRecord, err := s.isValidVideo(videoId)
 	if err != nil {
 		return err
