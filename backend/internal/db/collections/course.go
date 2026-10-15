@@ -40,6 +40,24 @@ func CreateCourseCollection(app core.App) *core.Collection {
 			Min:  &minPrice,
 		},
 
+		&core.FileField{
+			Name:      "thumbnail",
+			MaxSelect: 1,
+			MaxSize:   10 * 1024 * 1024,
+			MimeTypes: []string{
+				"image/jpg",
+				"image/png",
+				"image/vnd.mozilla.apng",
+				"image/gif",
+				"image/webp",
+				"image/tiff",
+				"image/avif",
+				"image/heif",
+				"image/heic",
+				"image/svg+xml",
+			},
+		},
+
 		&core.AutodateField{
 			Name:     "created",
 			OnCreate: true,

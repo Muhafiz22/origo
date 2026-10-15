@@ -20,6 +20,7 @@ import { deleteNote } from "../services/noteServices.jsx";
 
 function CourseWorkspace() {
   const { courseId } = useParams();
+  const navigate = useNavigate();
 
   const { course, setCourse, chapters, setChapters, loading, error } =
     useCourseWithChapters(courseId);
@@ -29,7 +30,6 @@ function CourseWorkspace() {
 
   const [chapterModal, setChapterModal] = useState(null);
   const [deletingChapter, setDeletingChapter] = useState(null);
-  const [deleteError, setDeleteError] = useState(null);
 
   const [videoModal, setVideoModal] = useState(null);
   const [deletingVideo, setDeletingVideo] = useState(null);
@@ -37,7 +37,9 @@ function CourseWorkspace() {
   const [noteModal, setNoteModal] = useState(null);
   const [deletingNote, setDeletingNote] = useState(null);
 
-  const navigate = useNavigate();
+  const [deleteError, setDeleteError] = useState(null);
+
+  /* ---------------------------- Course ---------------------------- */
 
   function handleEditCourse() {
     setCourseModal({
@@ -47,29 +49,48 @@ function CourseWorkspace() {
   }
 
   function handleCourseUpdated(updatedCourse) {
-    setCourse(updatedCourse);
+    setCourse((current) => ({ ...current, ...updatedCourse }));
+    setCourseModal(null);
+  }
+
+  function handleCloseCourseModal() {
     setCourseModal(null);
   }
 
   function handleDeleteCourse(course) {
-    setDeletingCourse(course);
     setDeleteError(null);
+    setDeletingCourse(course);
   }
 
   function handleCancelDeleteCourse() {
-    setDeletingCourse(null);
     setDeleteError(null);
+    setDeletingCourse(null);
   }
 
   async function handleConfirmDeleteCourse() {
+    setDeleteError(null);
     try {
-      await deleteCourse(deletingCourse.courseId);
+      // use the route param: it's the one id we know is correct
+      await deleteCourse(courseId);
 
-      navigate("/dashboard");
       setDeletingCourse(null);
+      navigate("/dashboard");
     } catch (error) {
       setDeleteError(error.message);
     }
+  }
+
+  /* ---------------------------- Chapter ---------------------------- */
+
+  function handleOpenChapterModal() {
+    setChapterModal({ mode: "create" });
+  }
+
+  function handleEditChapter(chapter) {
+    setChapterModal({
+      mode: "edit",
+      chapter,
+    });
   }
 
   function handleChapterCreated(newChapter) {
@@ -78,6 +99,7 @@ function CourseWorkspace() {
       {
         ...newChapter,
         videos: [],
+        notes: [],
       },
     ]);
 
@@ -96,17 +118,6 @@ function CourseWorkspace() {
     setChapterModal(null);
   }
 
-  function handleOpenChapterModal() {
-    setChapterModal({ mode: "create" });
-  }
-
-  function handleEditChapter(chapter) {
-    setChapterModal({
-      mode: "edit",
-      chapter,
-    });
-  }
-
   function handleCloseChapterModal() {
     setChapterModal(null);
   }
@@ -117,11 +128,12 @@ function CourseWorkspace() {
   }
 
   function handleCancelDeleteChapter() {
-    setDeletingChapter(null);
     setDeleteError(null);
+    setDeletingChapter(null);
   }
 
   async function handleConfirmDeleteChapter() {
+    setDeleteError(null);
     try {
       await deleteChapter(deletingChapter.id);
 
@@ -134,6 +146,8 @@ function CourseWorkspace() {
       setDeleteError(error.message);
     }
   }
+
+  /* ----------------------------- Video ----------------------------- */
 
   function handleAddVideo(chapter) {
     setVideoModal({
@@ -150,19 +164,9 @@ function CourseWorkspace() {
     });
   }
 
-  function handleDeleteVideo(chapter, video) {
-    setDeleteError(null);
-    setDeletingVideo({
-      chapter,
-      video,
-    });
-  }
-
   function handleVideoSuccess(newVideo) {
     const chapterId = videoModal.chapter.id;
-
-    console.log("UPDATED VIDEO:", newVideo);
-    console.log("VIDEO MODAL:", videoModal);
+    const mode = videoModal.mode;
 
     setChapters((chapters) =>
       chapters.map((chapter) => {
@@ -170,7 +174,7 @@ function CourseWorkspace() {
           return chapter;
         }
 
-        if (videoModal.mode === "create") {
+        if (mode === "create") {
           return {
             ...chapter,
             videos: [...(chapter.videos ?? []), newVideo],
@@ -185,7 +189,25 @@ function CourseWorkspace() {
         };
       }),
     );
+
     setVideoModal(null);
+  }
+
+  function handleCloseVideoModal() {
+    setVideoModal(null);
+  }
+
+  function handleDeleteVideo(chapter, video) {
+    setDeleteError(null);
+    setDeletingVideo({
+      chapter,
+      video,
+    });
+  }
+
+  function handleCancelDeleteVideo() {
+    setDeleteError(null);
+    setDeletingVideo(null);
   }
 
   async function handleConfirmDeleteVideo() {
@@ -205,20 +227,14 @@ function CourseWorkspace() {
             : chapter,
         ),
       );
+
       setDeletingVideo(null);
     } catch (error) {
       setDeleteError(error.message);
     }
   }
 
-  function handleCancelDeleteVideo() {
-    setDeleteError(null);
-    setDeletingVideo(null);
-  }
-
-  function handleCloseVideoModal() {
-    setVideoModal(null);
-  }
+  /* ------------------------------ Note ------------------------------ */
 
   function handleAddNote(chapter) {
     setNoteModal({
@@ -235,19 +251,9 @@ function CourseWorkspace() {
     });
   }
 
-  function handleDeleteNote(chapter, note) {
-    setDeleteError(null);
-    setDeletingNote({
-      chapter,
-      note,
-    });
-  }
-
   function handleNoteSuccess(newNote) {
     const chapterId = noteModal.chapter.id;
-
-    console.log("UPDATED NOTE:", newNote);
-    console.log("NOTE MODAL:", noteModal);
+    const mode = noteModal.mode;
 
     setChapters((chapters) =>
       chapters.map((chapter) => {
@@ -255,7 +261,7 @@ function CourseWorkspace() {
           return chapter;
         }
 
-        if (noteModal.mode === "create") {
+        if (mode === "create") {
           return {
             ...chapter,
             notes: [...(chapter.notes ?? []), newNote],
@@ -270,7 +276,25 @@ function CourseWorkspace() {
         };
       }),
     );
+
     setNoteModal(null);
+  }
+
+  function handleCloseNoteModal() {
+    setNoteModal(null);
+  }
+
+  function handleDeleteNote(chapter, note) {
+    setDeleteError(null);
+    setDeletingNote({
+      chapter,
+      note,
+    });
+  }
+
+  function handleCancelDeleteNote() {
+    setDeleteError(null);
+    setDeletingNote(null);
   }
 
   async function handleConfirmDeleteNote() {
@@ -290,20 +314,14 @@ function CourseWorkspace() {
             : chapter,
         ),
       );
+
       setDeletingNote(null);
     } catch (error) {
       setDeleteError(error.message);
     }
   }
 
-  function handleCancelDeleteNote() {
-    setDeleteError(null);
-    setDeletingNote(null);
-  }
-
-  function handleCloseNoteModal() {
-    setNoteModal(null);
-  }
+  /* ------------------------------ Render ------------------------------ */
 
   if (loading) {
     return (
@@ -352,6 +370,10 @@ function CourseWorkspace() {
     );
   }
 
+  if (!course) {
+    return null;
+  }
+
   return (
     <main className="mx-auto max-w-5xl px-6 py-16 lg:px-8">
       <header className="rounded-lg">
@@ -359,45 +381,21 @@ function CourseWorkspace() {
           <div className="flex items-center gap-8">
             <h1 className="mt-4 max-w-4xl font-display text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
               {course.name}
-            </h1>{" "}
+            </h1>
+
             <ActionMenu
               label={`Action for ${course.name}`}
               onEdit={handleEditCourse}
               onDelete={() => handleDeleteCourse(course)}
+              alwaysVisible
             />
           </div>
 
           <p className="text-base-content/60">{course.description}</p>
 
           <p className="font-mono text-sm text-base-content/60">
-            {course.price === 0 ? "Free Course" : `₹${course.price}`}
+            {Number(course.price) === 0 ? "Free Course" : `₹${course.price}`}
           </p>
-
-          <Modal
-            isOpen={courseModal !== null}
-            onClose={() => setCourseModal(null)}
-          >
-            {courseModal && (
-              <CourseForm
-                mode={courseModal?.mode}
-                initialData={courseModal?.course}
-                onSuccess={handleCourseUpdated}
-                onCancel={() => setCourseModal(null)}
-              />
-            )}
-          </Modal>
-
-          <ConfirmDialog
-            isOpen={deletingCourse !== null}
-            title={"Delete Course"}
-            message={
-              deletingCourse
-                ? `Delete '${course.name}'. This cannot be undone. All the related content will be deleted.`
-                : ""
-            }
-            onConfirm={handleConfirmDeleteCourse}
-            onCancel={handleCancelDeleteCourse}
-          />
         </div>
 
         <div className="mt-6 flex items-center justify-between">
@@ -429,15 +427,42 @@ function CourseWorkspace() {
         />
       </section>
 
+      {/* Course */}
+      <Modal isOpen={courseModal !== null} onClose={handleCloseCourseModal}>
+        {courseModal && (
+          <CourseForm
+            key={`${courseModal.mode}-${courseModal.course?.id ?? "new"}`}
+            mode={courseModal.mode}
+            initialData={courseModal.course ?? null}
+            onSuccess={handleCourseUpdated}
+            onCancel={handleCloseCourseModal}
+          />
+        )}
+      </Modal>
+
+      <ConfirmDialog
+        isOpen={deletingCourse !== null}
+        title="Delete Course"
+        message={
+          deletingCourse
+            ? `Delete "${deletingCourse.name}". This cannot be undone. All the related content will be deleted.`
+            : ""
+        }
+        onConfirm={handleConfirmDeleteCourse}
+        onCancel={handleCancelDeleteCourse}
+      />
+
+      {/* Chapter */}
       <Modal isOpen={chapterModal !== null} onClose={handleCloseChapterModal}>
         {chapterModal && (
           <ChapterForm
+            key={`${chapterModal.mode}-${chapterModal.chapter?.id ?? "new"}`}
             courseId={courseId}
-            mode={chapterModal?.mode}
-            initialData={chapterModal?.chapter ?? null}
+            mode={chapterModal.mode}
+            initialData={chapterModal.chapter ?? null}
             isOpen={chapterModal !== null}
             onSuccess={
-              chapterModal?.mode === "edit"
+              chapterModal.mode === "edit"
                 ? handleChapterUpdated
                 : handleChapterCreated
             }
@@ -458,13 +483,14 @@ function CourseWorkspace() {
         onCancel={handleCancelDeleteChapter}
       />
 
+      {/* Video */}
       <Modal isOpen={videoModal !== null} onClose={handleCloseVideoModal}>
         {videoModal && (
           <VideoForm
             key={`${videoModal.mode}-${videoModal.video?.id ?? videoModal.chapter.id}`}
             mode={videoModal.mode}
             chapterId={videoModal.chapter.id}
-            initialData={videoModal.video}
+            initialData={videoModal.video ?? null}
             onSuccess={handleVideoSuccess}
             onCancel={handleCloseVideoModal}
           />
@@ -483,13 +509,14 @@ function CourseWorkspace() {
         onCancel={handleCancelDeleteVideo}
       />
 
+      {/* Note */}
       <Modal isOpen={noteModal !== null} onClose={handleCloseNoteModal}>
         {noteModal && (
           <NoteForm
             key={`${noteModal.mode}-${noteModal.note?.id ?? noteModal.chapter.id}`}
             mode={noteModal.mode}
             chapterId={noteModal.chapter.id}
-            initialData={noteModal.note}
+            initialData={noteModal.note ?? null}
             onSuccess={handleNoteSuccess}
             onCancel={handleCloseNoteModal}
           />
@@ -498,7 +525,7 @@ function CourseWorkspace() {
 
       <ConfirmDialog
         isOpen={deletingNote !== null}
-        title={"Delete Note"}
+        title="Delete Note"
         message={
           deletingNote
             ? `Delete "${deletingNote.note.title}". This cannot be undone.`

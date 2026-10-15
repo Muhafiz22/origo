@@ -56,7 +56,6 @@ export function AuthProvider({ children }) {
     setUser(null);
     setStatus("unauthenticated");
   };
-  console.log("AUTH STATE:", { user, status });
 
   return (
     <AuthContext.Provider value={{ user, status, emailAuth, login, logout }}>

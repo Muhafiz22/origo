@@ -15,15 +15,17 @@ export function getMyCourses() {
 export function createCourse(data) {
   return apiClient(`/courses`, {
     method: "POST",
-    body: JSON.stringify(data),
+    body: data,
   });
 }
 
-export function updateCourse(courseId, data) {
-  return apiClient(`/courses/${courseId}`, {
+export async function updateCourse(courseId, data) {
+  const result = await apiClient(`/courses/${courseId}`, {
     method: "PATCH",
-    body: JSON.stringify(data),
+    body: data,
   });
+
+  return result;
 }
 
 export function deleteCourse(courseId) {

@@ -53,7 +53,7 @@ func isValidThumbnailFile(header *multipart.FileHeader) error {
 	ext := strings.ToLower(filepath.Ext(header.Filename))
 
 	switch ext {
-	case ".jpg", ".jpeg", ".png", ".webp":
+	case ".jpg", ".png", ".webp":
 
 	default:
 		return apperr.FromValidationErrors(map[string]error{

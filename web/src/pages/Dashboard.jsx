@@ -102,7 +102,11 @@ function Dashboard() {
 
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {myCourses.map((course) => (
-            <CourseCard key={course.courseId} course={course} variant="dashboard"/>
+            <CourseCard
+              key={course.courseId}
+              course={course}
+              variant="dashboard"
+            />
           ))}
         </div>
       </section>

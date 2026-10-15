@@ -4,6 +4,9 @@ import (
 	"backend/internal/apperr"
 	"database/sql"
 	"errors"
+	"mime/multipart"
+	"path/filepath"
+	"strings"
 
 	"github.com/pocketbase/pocketbase/core"
 )
@@ -55,4 +58,30 @@ func (s *Service) isValidCourse(courseId string) (*core.Record, error) {
 
 func (s *Service) isCourseCreator(courseRecord *core.Record, userId string) bool {
 	return courseRecord.GetString("creatorId") == userId
+}
+
+func isValidThumbnailFile(header *multipart.FileHeader) error {
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+
+	switch ext {
+	case ".jpg", ".png", ".webp":
+
+	default:
+		return apperr.FromValidationErrors(map[string]error{
+			"thumbnail": errors.New("thumbnail must be a JPG, PNG, or WebP image"),
+		})
+	}
+
+	contentType := header.Header.Get("Content-Type")
+
+	switch contentType {
+	case "image/jpeg", "image/png", "image/webp":
+
+	default:
+		return apperr.FromValidationErrors(map[string]error{
+			"thumbnail": errors.New("thumbnail must be a JPG, PNG, or WebP image"),
+		})
+	}
+
+	return nil
 }

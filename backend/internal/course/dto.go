@@ -3,9 +3,9 @@ package course
 import "github.com/pocketbase/pocketbase/tools/types"
 
 type CreateCourseRequest struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
+	Name        string  `json:"name" form:"name"`
+	Description string  `json:"description" form:"description"`
+	Price       float64 `json:"price" form:"price"`
 }
 
 type CourseResponse struct {
@@ -20,7 +20,7 @@ type CourseResponse struct {
 }
 
 type UpdateCourseRequest struct {
-	Name        *string  `json:"name"`
-	Description *string  `json:"description"`
-	Price       *float64 `json:"price"`
+	Name        *string  `json:"name" form:"name"`
+	Description *string  `json:"description" form:"description"`
+	Price       *float64 `json:"price" form:"price"`
 }

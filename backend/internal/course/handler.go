@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/filesystem"
 )
 
 type Handler struct {
@@ -25,11 +26,15 @@ func (h *Handler) createCourseHandler(e *core.RequestEvent) error {
 
 	var req CreateCourseRequest
 	if err := e.BindBody(&req); err != nil {
-		h.service.app.Logger().Info("BindBody Failed", "error", err)
 		return apis.MapError(err)
 	}
 
 	validationErrors := make(map[string]error)
+
+	_, thumbnailHeader, err := e.Request.FormFile("thumbnail")
+	if err != nil {
+		validationErrors["thumbnail"] = errors.New("thumbnail is required")
+	}
 
 	if strings.TrimSpace(req.Name) == "" {
 		validationErrors["name"] = errors.New("name is required")
@@ -43,7 +48,16 @@ func (h *Handler) createCourseHandler(e *core.RequestEvent) error {
 		return apis.MapError(apperr.FromValidationErrors(validationErrors))
 	}
 
-	response, err := h.service.createCourse(userId, req)
+	if err := isValidThumbnailFile(thumbnailHeader); err != nil {
+		return apis.MapError(err)
+	}
+
+	thumbnailFile, err := filesystem.NewFileFromMultipart(thumbnailHeader)
+	if err != nil {
+		return apis.MapError(err)
+	}
+
+	response, err := h.service.createCourse(userId, req, thumbnailFile)
 	if err != nil {
 		return apis.MapError(err)
 	}

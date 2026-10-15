@@ -21,13 +21,13 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) createVideoHandler(e *core.RequestEvent) error {
+	userId := e.Auth.Id
+	chapterId := e.Request.PathValue("chapterId")
+
 	var req CreateVideoRequest
 	if err := e.BindBody(&req); err != nil {
 		return apis.MapError(err)
 	}
-
-	userId := e.Auth.Id
-	chapterId := e.Request.PathValue("chapterId")
 
 	validationErrors := make(map[string]error)
 

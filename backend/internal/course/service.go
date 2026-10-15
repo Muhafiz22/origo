@@ -4,6 +4,7 @@ import (
 	"backend/internal/apperr"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/tools/filesystem"
 )
 
 type Service struct {
@@ -16,7 +17,15 @@ func NewService(app core.App) *Service {
 	}
 }
 
-func (s *Service) createCourse(userId string, req CreateCourseRequest) (CourseResponse, error) {
+func (s *Service) Filesystem() (*filesystem.System, error) {
+	fsys, err := s.app.NewFilesystem()
+	if err != nil {
+		return nil, err
+	}
+	return fsys, nil
+}
+
+func (s *Service) createCourse(userId string, req CreateCourseRequest, thumbnailFile *filesystem.File) (CourseResponse, error) {
 	course, err := s.app.FindCollectionByNameOrId("courses")
 	if err != nil {
 		s.app.Logger().Error(
@@ -31,6 +40,7 @@ func (s *Service) createCourse(userId string, req CreateCourseRequest) (CourseRe
 	record.Set("description", req.Description)
 	record.Set("price", req.Price)
 	record.Set("creatorId", userId)
+	record.Set("thumbnail", thumbnailFile)
 
 	if err := s.app.Save(record); err != nil {
 		s.app.Logger().Error(
