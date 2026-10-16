@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import OrigoStamp from "../components/ui/origoStamp";
 import CourseCard from "../components/CourseCard";
 import { getCourses } from "../services/courseServices";
+import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 
 function Home() {
   const [courses, setCourses] = useState([]);
@@ -39,15 +40,17 @@ function Home() {
             </h1>
 
             <p className="mt-7 max-w-2xl text-lg leading-relaxed text-base-content/70 sm:text-xl">
-              A single place to bring your learning together and make sense of it.
-              Study with structure, keep your progress, and return whenever you need.
+              A single place to bring your learning together and make sense of
+              it. Study with structure, keep your progress, and return whenever
+              you need.
             </p>
 
             <Link
               to="/courses"
               className="btn mt-9 border-none bg-primary px-6 font-mono text-sm text-primary-content hover:bg-primary/80"
             >
-              Start reading →
+              <span>Start Reading</span>
+              <ArrowLongRightIcon className="size-4" />
             </Link>
           </div>
 
@@ -93,7 +96,7 @@ function Home() {
               ))
             )}
           </div>
-         </div>
+        </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
@@ -106,7 +109,8 @@ function Home() {
             </h2>
 
             <p className="mt-3 leading-relaxed text-base-content/65">
-              A collection of courses and learning materials, gathered in one place for easy study and reference.
+              A collection of courses and learning materials, gathered in one
+              place for easy study and reference.
             </p>
           </div>
 
@@ -118,7 +122,8 @@ function Home() {
             </h2>
 
             <p className="mt-3 leading-relaxed text-base-content/65">
-              Move through courses and chapters with a clear sense of what's covered and what comes next.
+              Move through courses and chapters with a clear sense of what's
+              covered and what comes next.
             </p>
           </div>
 
@@ -130,7 +135,8 @@ function Home() {
             </h2>
 
             <p className="mt-3 leading-relaxed text-base-content/65">
-              Notes and progress form a lasting record of learning, always there to revisit and continue from.
+              Notes and progress form a lasting record of learning, always there
+              to revisit and continue from.
             </p>
           </div>
         </div>

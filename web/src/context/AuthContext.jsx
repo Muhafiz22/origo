@@ -10,7 +10,6 @@ import * as authServices from "../services/authServices";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  console.log("AuthProvider rendered");
   const [user, setUser] = useState(null);
   const [status, setStatus] = useState("loading");
   const [emailAuth, setEmailAuth] = useState(null);
@@ -27,15 +26,12 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    console.log("Fetching Auth Config...");
     authServices
       .getAuthConfig()
       .then((cfg) => {
-        console.log("AUTH CONFIG:", cfg);
         setEmailAuth(Boolean(cfg?.emailAuth));
       })
       .catch((err) => {
-        console.error("Failed to load auth config:", err);
         setEmailAuth(false);
       });
   }, []);

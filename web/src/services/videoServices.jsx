@@ -32,6 +32,7 @@ export async function getVideos(chapterId) {
 export async function getVideoContent(videoId) {
   const response = await fetch(`${API_URL}/videos/${videoId}/content`, {
     credentials: "include",
+    cache: "no-store",
   });
 
   if (!response.ok) {

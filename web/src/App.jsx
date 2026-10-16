@@ -18,6 +18,7 @@ import CourseWorkspace from "./pages/CourseWorkspace";
 import { CreateCourse } from "./components/CreateCourse";
 import ScrollToTop from "./components/ScrollToTop";
 import { ToastProvider } from "./components/ToastProvider";
+import MyLearning from "./pages/MyLearning";
 
 function App() {
   return (
@@ -78,6 +79,17 @@ function App() {
                   </ProtectedRoute>
                 }
               ></Route>
+
+              <Route
+                path="/my-learning"
+                element={
+                  <ProtectedRoute>
+                    <MyLearning />
+                  </ProtectedRoute>
+                }
+              >
+
+              </Route>
 
               <Route
                 path="/dashboard/courses/:courseId"

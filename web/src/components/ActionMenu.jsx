@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { EllipsisHorizontalIcon } from "@heroicons/react/20/solid";
+import {
+  EllipsisHorizontalIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 
 function ActionMenu({ label, onEdit, onDelete, alwaysVisible = false }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,7 +13,7 @@ function ActionMenu({ label, onEdit, onDelete, alwaysVisible = false }) {
     if (!isOpen) return;
 
     function handleMouseDown(event) {
-      if (!rootRef.current.contains(event.target)) {
+      if (!rootRef.current?.contains(event.target)) {
         setIsOpen(false);
       }
     }
@@ -39,6 +43,9 @@ function ActionMenu({ label, onEdit, onDelete, alwaysVisible = false }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={label}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
         className={`btn btn-ghost btn-sm btn-square transition-opacity ${
           alwaysVisible
             ? "opacity-100"
@@ -46,27 +53,33 @@ function ActionMenu({ label, onEdit, onDelete, alwaysVisible = false }) {
               ? "opacity-100"
               : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
         }`}
-        aria-label={label}
       >
         <EllipsisHorizontalIcon className="size-5" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-10 mt-1 w-32 rounded-md border border-base-300 bg-base-100 p-1 shadow-lg">
+        <div
+          role="menu"
+          className="absolute left-4 bottom-full z-50 mb-1 w-40 border border-base-300 bg-base-200"
+        >
           <button
             type="button"
+            role="menuitem"
             onClick={() => run(onEdit)}
-            className="w-full rounded px-3 py-2 text-left text-sm hover:bg-base-200"
+            className="flex w-full items-center justify-between px-4 py-3 text-left font-mono text-sm text-base-content/70 transition-colors hover:bg-base-300/60 hover:text-base-content"
           >
-            Edit
+            <span>Edit</span>
+            <PencilSquareIcon className="size-5" aria-hidden="true" />
           </button>
 
           <button
             type="button"
+            role="menuitem"
             onClick={() => run(onDelete)}
-            className="w-full rounded px-3 py-2 text-left text-sm text-error hover:bg-base-200"
+            className="flex w-full items-center justify-between border-t border-base-300 px-4 py-3 text-left font-mono text-sm text-error transition-colors hover:bg-error/10"
           >
-            Delete
+            <span>Delete</span>
+            <TrashIcon className="size-5" aria-hidden="true" />
           </button>
         </div>
       )}

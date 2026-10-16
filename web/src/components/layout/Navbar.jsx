@@ -2,9 +2,22 @@ import { Link } from "react-router";
 import { Sun, Moon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../ToastProvider";
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
+
+function logoutErrorMessage(error) {
+  if (error?.isNetwork) {
+    return "Unable to reach the server. Check your connection.";
+  }
+  return error?.isServer
+    ? "Something went wrong on our end. Try again in a moment."
+    : "Couldn't log out. Try again.";
+}
 
 function Navbar() {
-  const { user, status, login, logout } = useAuth();
+  const { user, status, logout } = useAuth();
+  const toast = useToast();
+  const [loggingOut, setLoggingOut] = useState(false);
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "origo-light";
   });
@@ -18,6 +31,19 @@ function Navbar() {
     setTheme((currentTheme) => {
       return currentTheme === "origo-light" ? "origo-dark" : "origo-light";
     });
+  }
+
+  async function handleLogout() {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+    try {
+      await logout();
+    } catch (err) {
+      toast.error(logoutErrorMessage(err));
+    } finally {
+      setLoggingOut(false);
+    }
   }
 
   return (
@@ -60,7 +86,7 @@ function Navbar() {
               </Link>
 
               <Link
-                to="/mylearning"
+                to="/my-learning"
                 className="font-body text-sm font-medium text-base-content transition-colors hover:text-primary"
               >
                 My Learning
@@ -68,23 +94,58 @@ function Navbar() {
 
               <div className="dropdown dropdown-end">
                 <button
+                  type="button"
                   tabIndex={0}
+                  aria-label="Account menu"
                   className="btn btn-ghost btn-circle avatar placeholder"
                 >
-                  <div className="w-8 rounded-full bg-neutral text-neutral-content">
-                    <span className="text-sm">
+                  <div className="w-8 rounded-full bg-neutral text-neutral-content ring-1 ring-base-300 transition-colors hover:ring-accent">
+                    <span className="font-mono text-sm">
                       {user?.name?.[0]?.toUpperCase() ?? "?"}
                     </span>
                   </div>
                 </button>
-                <ul
+
+                <div
                   tabIndex={0}
-                  className="dropdown-content menun z-10 m-3 w-40 rounded-box bg-base-100 p-2 shadow"
+                  className="dropdown-content z-50 mt-3 w-72 border border-base-300 bg-base-200"
                 >
-                  <li>
-                    <button onClick={logout}>Log out</button>
-                  </li>
-                </ul>
+                  <div className="border-b border-base-300 px-4 py-3">
+                    <p className="font-mono text-xs tracking-[0.1em] text-accent">
+                      Signed in as
+                    </p>
+
+                    <p className="mt-1 truncate font-display text-base font-semibold">
+                      {user?.name}
+                    </p>
+
+                    {user?.email && (
+                      <p
+                        className="truncate text-xs text-base-content/60"
+                        title={user.email}
+                      >
+                        {user.email}
+                      </p>
+                    )}
+                  </div>
+
+                  <ul className="menu w-full p-0">
+                    <li>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        disabled={loggingOut}
+                        className="flex w-full items-center justify-start gap-4 rounded-none px-4 py-3 font-mono text-sm text-base-content/70 hover:bg-base-300/60 hover:text-base-content"
+                      >
+                        <span>{loggingOut ? "Logging out..." : "Log out"}</span>
+                        <ArrowRightStartOnRectangleIcon
+                          className="size-5"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </>
           ) : (

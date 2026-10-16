@@ -32,6 +32,7 @@ export async function deleteNote(noteId) {
 export async function getNoteContent(noteId) {
   const response = await fetch(`${API_URL}/notes/${noteId}/content`, {
     credentials: "include",
+    cache: "no-store",
   });
 
   if (!response.ok) {

@@ -13,7 +13,7 @@ function noteErrorMessage(error, note) {
     case 403:
       return "This is a paid course. Purchase the course to open its notes.";
     default:
-      return error?.isNetwork
+      return error?.status == null
         ? "Unable to reach the server. Check your connection."
         : `Failed to open ${note.title}`;
   }

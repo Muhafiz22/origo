@@ -33,3 +33,7 @@ export function deleteCourse(courseId) {
     method: "DELETE",
   });
 }
+
+export function getMyLearning(){
+  return apiClient(`/courses/mylearning`)
+}

@@ -13,7 +13,7 @@ function CourseForm({
   const [description, setDescription] = useState(
     initialData?.description ?? "",
   );
-  // kept as a string so the field can be cleared while typing
+
   const [price, setPrice] = useState(String(initialData?.price ?? 0));
   const [thumbnail, setThumbnail] = useState(null);
 
