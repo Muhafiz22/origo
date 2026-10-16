@@ -24,10 +24,3 @@ type VideoMetadataResponse struct {
 type VideoContentResponse struct {
 	VideoURL string `json:"videoUrl"`
 }
-
-type CourseProgressResponse struct {
-	CompletedVideoIds []string `json:"completedVideoIds"`
-	CompletedCount    int      `json:"completedCount"`
-	TotalVideos       int      `json:"totalVideos"`
-	Percent           int      `json:"percent"`
-}

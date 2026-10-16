@@ -12,6 +12,8 @@ func RegisterRoutes(r *pocketRouter.Router[*core.RequestEvent], h *Handler) {
 	g.GET("", h.listCoursesHandler)
 	g.GET("/mine", h.listMyCoursesHandler).Bind(apis.RequireAuth("users"))
 	g.GET("/{courseId}", h.getCourseHandler)
+	g.GET("/{courseId}/progress", h.getCourseProgressHandler).Bind(apis.RequireAuth("users"))
+	g.GET("/mylearning", h.getMyLearningHandler).Bind(apis.RequireAuth("users"))
 
 	g.POST("", h.createCourseHandler).Bind(apis.RequireAuth("users"))
 	g.PATCH("/{courseId}", h.updateCourseHandler).Bind(apis.RequireAuth("users"))

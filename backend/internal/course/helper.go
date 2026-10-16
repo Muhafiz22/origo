@@ -4,6 +4,7 @@ import (
 	"backend/internal/apperr"
 	"database/sql"
 	"errors"
+	"fmt"
 	"mime/multipart"
 	"path/filepath"
 	"strings"
@@ -25,15 +26,29 @@ func (s *Service) toCourseResponse(record *core.Record) CourseResponse {
 	} else {
 		creatorName = creatorRecord.GetString("name")
 	}
+
+	thumbnail := record.GetString("thumbnail")
+
+	thumbnailURL := ""
+	if thumbnail != "" {
+		thumbnailURL = fmt.Sprintf(
+			"/api/files/%s/%s/%s?thumb=640x360",
+			record.Collection().Id,
+			record.Id,
+			thumbnail,
+		)
+	}
+
 	response := CourseResponse{
-		CourseId:    record.Id,
-		Name:        record.GetString("name"),
-		Description: record.GetString("description"),
-		Price:       record.GetFloat("price"),
-		CreatorId:   creatorId,
-		CreatorName: creatorName,
-		CreatedAt:   record.Collection().Created,
-		UpdatedAt:   record.Collection().Updated,
+		CourseId:     record.Id,
+		Name:         record.GetString("name"),
+		Description:  record.GetString("description"),
+		Price:        record.GetFloat("price"),
+		CreatorId:    creatorId,
+		CreatorName:  creatorName,
+		ThumbnailUrl: thumbnailURL,
+		CreatedAt:    record.GetDateTime("created"),
+		UpdatedAt:    record.GetDateTime("updated"),
 	}
 	return response
 }
@@ -83,5 +98,12 @@ func isValidThumbnailFile(header *multipart.FileHeader) error {
 		})
 	}
 
+	return nil
+}
+
+func (s *Service) canAccessCourse(courseRecord *core.Record) error {
+	if courseRecord.GetFloat("price") > 0 {
+		return apperr.ErrForbidden
+	}
 	return nil
 }

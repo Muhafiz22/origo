@@ -90,10 +90,31 @@ func (h *Handler) updateCourseHandler(e *core.RequestEvent) error {
 		return apis.MapError(err)
 	}
 
+	var thumbnailFile *filesystem.File
+
+	_, thumbnailHeader, err := e.Request.FormFile("thumbnail")
+	if err == nil {
+		if err := isValidThumbnailFile(thumbnailHeader); err != nil {
+			return apis.MapError(err)
+		}
+
+		thumbnailFile, err = filesystem.NewFileFromMultipart(thumbnailHeader)
+		if err != nil {
+			return apis.MapError(err)
+		}
+	} else if !errors.Is(err, http.ErrMissingFile) {
+		return apis.MapError(err)
+	}
+
 	userId := e.Auth.Id
 	courseId := e.Request.PathValue("courseId")
 
-	response, err := h.service.updateCourse(courseId, userId, req)
+	response, err := h.service.updateCourse(
+		courseId,
+		userId,
+		req,
+		thumbnailFile,
+	)
 	if err != nil {
 		return apis.MapError(err)
 	}
@@ -123,4 +144,24 @@ func (h *Handler) listMyCoursesHandler(e *core.RequestEvent) error {
 	}
 
 	return e.JSON(http.StatusOK, responses)
+}
+
+func (h *Handler) getCourseProgressHandler(e *core.RequestEvent) error {
+	userId := e.Auth.Id
+	courseId := e.Request.PathValue("courseId")
+
+	progress, err := h.service.getCourseProgress(userId, courseId)
+	if err != nil {
+		return apis.MapError(err)
+	}
+
+	return e.JSON(http.StatusOK, progress)
+}
+
+func (h *Handler) getMyLearningHandler(e *core.RequestEvent) error {
+	items, err := h.service.getMyLearning(e.Auth.Id)
+	if err != nil {
+		return apis.MapError(err)
+	}
+	return e.JSON(http.StatusOK, items)
 }

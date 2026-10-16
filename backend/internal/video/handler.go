@@ -171,15 +171,3 @@ func (h *Handler) unmarkVideoDoneHandler(e *core.RequestEvent) error {
 
 	return e.NoContent(http.StatusNoContent)
 }
-
-func (h *Handler) getCourseProgressHandler(e *core.RequestEvent) error {
-	userId := e.Auth.Id
-	courseId := e.Request.PathValue("courseId")
-
-	progress, err := h.service.getCourseProgress(userId, courseId)
-	if err != nil {
-		return apis.MapError(err)
-	}
-
-	return e.JSON(http.StatusOK, progress)
-}
