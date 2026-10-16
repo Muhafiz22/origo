@@ -42,10 +42,12 @@ func CreateCourseCollection(app core.App) *core.Collection {
 
 		&core.FileField{
 			Name:      "thumbnail",
+			Required:  true,
 			MaxSelect: 1,
 			MaxSize:   10 * 1024 * 1024,
+			Thumbs:    []string{"640x360"},
 			MimeTypes: []string{
-				"image/jpg",
+				"image/jpeg",
 				"image/png",
 				"image/vnd.mozilla.apng",
 				"image/gif",

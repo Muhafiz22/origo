@@ -52,6 +52,10 @@ func CreateVideoProgressCollection(app core.App) *core.Collection {
 			MaxSelect:     1,
 			CascadeDelete: true,
 		},
+		&core.AutodateField{
+			Name:     "created",
+			OnCreate: true,
+		},
 	)
 
 	collection.Indexes = []string{
