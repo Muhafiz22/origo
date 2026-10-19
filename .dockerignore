@@ -1,0 +1,13 @@
+.git
+.gitignore
+
+.env
+.env.*
+**/.env
+**/.env.*
+
+**/node_modules
+web/dist
+backend/bin
+**/pb_data
+**/*.log

@@ -1,0 +1,34 @@
+app = "origo"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  AUTH_MODE = "password"
+  # Same-origin in production; keep in sync with the app name above.
+  CORS_ALLOWED_ORIGINS = "https://origo.fly.dev"
+
+# SQLite + uploaded files live here. Single machine only.
+[mounts]
+  source = "origo_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/api/health"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "512mb"
