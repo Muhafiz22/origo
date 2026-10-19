@@ -1,7 +1,7 @@
 import { useId, useState } from "react";
 import { createCourse, updateCourse } from "../services/courseServices";
 
-function CourseForm({
+export function CourseForm({
   mode = "create",
   initialData = null,
   onSuccess,

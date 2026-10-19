@@ -1,5 +1,5 @@
 import apiClient from "./apiClient";
-const API_URL = import.meta.env.VITE_API_URL;
+import { API_BASE } from "./apiClient";
 
 export async function createVideo(chapterId, formData) {
   return apiClient(`/chapters/${chapterId}/videos`, {
@@ -30,7 +30,7 @@ export async function getVideos(chapterId) {
 }
 
 export async function getVideoContent(videoId) {
-  const response = await fetch(`${API_URL}/videos/${videoId}/content`, {
+  const response = await fetch(`${API_BASE}/videos/${videoId}/content`, {
     credentials: "include",
     cache: "no-store",
   });

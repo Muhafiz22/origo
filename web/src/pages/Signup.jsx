@@ -26,7 +26,7 @@ function Signup() {
     try {
       await signup({ username, email, password });
 
-      console.log("email auth: ", emailAuth)
+      console.log("email auth: ", emailAuth);
       if (emailAuth) {
         navigate("/check-email", { state: { email } });
       } else {

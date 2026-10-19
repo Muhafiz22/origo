@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "";
+export const API_BASE = "/api/v1";
 
 export class ApiError extends Error {
   constructor(message, status = 0, fields = {}) {
@@ -30,7 +30,7 @@ async function apiClient(endpoint, options = {}) {
   let response;
 
   try {
-    response = await fetch(`${API_URL}${endpoint}`, {
+    response = await fetch(`${API_BASE}${endpoint}`, {
       credentials: "include",
       ...options,
       headers: {

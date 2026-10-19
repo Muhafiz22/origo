@@ -29,40 +29,40 @@ function VideoPlayer({
   const location = useLocation();
 
   useEffect(() => {
-  if (!video) {
-    setVideoUrl(null);
-    return;
-  }
-
-  let cancelled = false;
-  let objectUrl = null;
-
-  async function loadVideo() {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const blob = await getVideoContent(video.id);
-      if (cancelled) return;
-
-      objectUrl = URL.createObjectURL(blob);
-      setVideoUrl(objectUrl);
-    } catch (err) {
-      if (cancelled) return;
-      setError(err);
+    if (!video) {
       setVideoUrl(null);
-    } finally {
-      if (!cancelled) setLoading(false);
+      return;
     }
-  }
 
-  loadVideo();
+    let cancelled = false;
+    let objectUrl = null;
 
-  return () => {
-    cancelled = true;
-    if (objectUrl) URL.revokeObjectURL(objectUrl);
-  };
-}, [video]);
+    async function loadVideo() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const blob = await getVideoContent(video.id);
+        if (cancelled) return;
+
+        objectUrl = URL.createObjectURL(blob);
+        setVideoUrl(objectUrl);
+      } catch (err) {
+        if (cancelled) return;
+        setError(err);
+        setVideoUrl(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadVideo();
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [video]);
   return (
     <div>
       {!video && (
@@ -81,18 +81,18 @@ function VideoPlayer({
 
       {video && error && (
         <div className="flex aspect-video flex-col items-center justify-center gap-3 rounded-lg bg-base-200 px-4 text-center">
-        <p className="font-semibold text-error">{videoErrorMessage(error)}</p>
+          <p className="font-semibold text-error">{videoErrorMessage(error)}</p>
 
-        {error.status === 401 && (
-          <Link
-            to="/login"
-            state={{ from: location.pathname + location.search }}
-            className="btn btn-primary btn-sm"
-          >
-            Sign in
-          </Link>
-        )}
-      </div>
+          {error.status === 401 && (
+            <Link
+              to="/login"
+              state={{ from: location.pathname + location.search }}
+              className="btn btn-primary btn-sm"
+            >
+              Sign in
+            </Link>
+          )}
+        </div>
       )}
 
       {video && videoUrl && !loading && !error && (
@@ -110,7 +110,7 @@ function VideoPlayer({
             type="button"
             onClick={onPrevious}
             disabled={!previousVideo}
-            className="btn btn-ghost hover:text-accent"
+            className="btn btn-ghost border border-base-content/60 bg-base-200 hover:text-accent"
           >
             Previous
           </button>

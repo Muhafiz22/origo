@@ -1,5 +1,5 @@
 import apiClient from "./apiClient";
-const API_URL = import.meta.env.VITE_API_URL;
+import { API_BASE } from "./apiClient";
 
 export async function createNote(chapterId, formData) {
   return apiClient(`/chapters/${chapterId}/notes`, {
@@ -30,7 +30,7 @@ export async function deleteNote(noteId) {
 }
 
 export async function getNoteContent(noteId) {
-  const response = await fetch(`${API_URL}/notes/${noteId}/content`, {
+  const response = await fetch(`${API_BASE}/notes/${noteId}/content`, {
     credentials: "include",
     cache: "no-store",
   });

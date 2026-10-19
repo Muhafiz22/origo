@@ -70,7 +70,12 @@ function Dashboard() {
             course.
           </p>
 
-          <button className="btn btn-primary mt-6">Create Course</button>
+          <Link
+            to="/courses/create"
+            className="mt-3 btn btn-primary hover:bg-primary/80"
+          >
+            Create Course
+          </Link>
         </section>
       </main>
     );
