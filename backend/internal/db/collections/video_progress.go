@@ -22,7 +22,7 @@ func CreateVideoProgressCollection(app core.App) *core.Collection {
 
 	videos, err := app.FindCollectionByNameOrId("videos")
 	if err != nil {
-		log.Fatal("failed to find videos collection: ", err)
+		log.Fatal("video_progress: failed to find videos collection: ", err)
 	}
 
 	courses, err := app.FindCollectionByNameOrId("courses")

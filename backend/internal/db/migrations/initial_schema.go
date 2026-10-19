@@ -38,6 +38,7 @@ func init() {
 				collections.CreateChapterCollection,
 				collections.CreateVideoCollection,
 				collections.CreateNoteCollection,
+				collections.CreateVideoProgressCollection,
 			}
 
 			for _, create := range creators {
@@ -53,6 +54,7 @@ func init() {
 
 		func(app core.App) error {
 			names := []string{
+				"video_progress",
 				"notes",
 				"videos",
 				"chapters",
