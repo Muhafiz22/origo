@@ -25,6 +25,15 @@ import (
 1. Password validation logic - uppercase, lowercase, numbers, special char check.
 */
 
+func dataDir() string {
+	return strings.TrimSpace(os.Getenv("DATA_DIR"))
+}
+
+func frontendDir() string {
+	dir := strings.TrimSpace(os.Getenv("FRONTEND_DIR"))
+	return dir
+}
+
 func corsOrigins() []string {
 	var origins []string
 	for _, o := range strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",") {
@@ -48,7 +57,10 @@ func main() {
 
 	origins := corsOrigins()
 
-	app := pocketbase.New()
+	app := pocketbase.NewWithConfig(pocketbase.Config{
+		DefaultDataDir: dataDir(),
+		DefaultDev:     osutils.IsProbablyGoRun(),
+	})
 	fmt.Println("app created")
 
 	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
@@ -100,6 +112,19 @@ func main() {
 				Note:       noteHandler,
 			},
 		)
+
+		if dir := frontendDir(); dir != "" {
+			// Unknown API GETs should return JSON, not the SPA's index.html.
+			se.Router.GET("/api/{path...}", func(e *core.RequestEvent) error {
+				return e.JSON(404, map[string]any{
+					"message": "Not found",
+					"status":  404,
+				})
+			})
+
+			// Serve the built frontend, with index.html fallback for SPA routes.
+			se.Router.GET("/{path...}", apis.Static(os.DirFS(dir), true))
+		}
 
 		app.Logger().Info(
 			"server started",
