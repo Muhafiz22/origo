@@ -24,13 +24,16 @@ type Dependencies struct {
 }
 
 func Register(r *pocketRouter.Router[*core.RequestEvent], d Dependencies) {
+
+	api := r.Group("/api/v1")
+
 	health.RegisterRoutes(r)
 
-	auth.RegisterRoutes(r, d.Auth, d.AuthConfig)
+	auth.RegisterRoutes(api, d.Auth, d.AuthConfig)
 
-	user.RegisterRoutes(r, d.User)
-	course.RegisterRoutes(r, d.Course)
-	chapter.RegisterRoutes(r, d.Chapter)
-	video.RegisterRoutes(r, d.Video)
-	note.RegisterRoutes(r, d.Note)
+	user.RegisterRoutes(api, d.User)
+	course.RegisterRoutes(api, d.Course)
+	chapter.RegisterRoutes(api, d.Chapter)
+	video.RegisterRoutes(api, d.Video)
+	note.RegisterRoutes(api, d.Note)
 }

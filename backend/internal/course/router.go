@@ -6,7 +6,7 @@ import (
 	pocketRouter "github.com/pocketbase/pocketbase/tools/router"
 )
 
-func RegisterRoutes(r *pocketRouter.Router[*core.RequestEvent], h *Handler) {
+func RegisterRoutes(r *pocketRouter.RouterGroup[*core.RequestEvent], h *Handler) {
 	g := r.Group("/courses")
 
 	g.GET("", h.listCoursesHandler)
