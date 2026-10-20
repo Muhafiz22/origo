@@ -1,4 +1,4 @@
-.PHONY: build run run-prod test clean clean-db
+.PHONY: build run run-prod test deploy clean clean-db
 
 BINARY    := backend/bin/origo_server
 FRONTEND  := $(CURDIR)/web/dist
@@ -22,6 +22,9 @@ run-prod: build
 
 test:
 	cd backend && go test ./...
+
+deploy: test
+	fly deploy
 
 clean:
 	rm -f $(BINARY)
