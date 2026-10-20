@@ -48,7 +48,6 @@ func CreateVideoCollection(app core.App) *core.Collection {
 
 		&core.FileField{
 			Name:      "thumbnail",
-			Required:  true,
 			MaxSelect: 1,
 			MimeTypes: []string{
 				"image/jpeg",

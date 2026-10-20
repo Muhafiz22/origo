@@ -37,9 +37,6 @@ func (h *Handler) createVideoHandler(e *core.RequestEvent) error {
 	}
 
 	_, thumbnailHeader, err := e.Request.FormFile("thumbnail")
-	if err != nil {
-		validationErrors["thumbnail"] = errors.New("thumbnail is required")
-	}
 
 	if len(validationErrors) > 0 {
 		return apis.MapError(
@@ -51,18 +48,21 @@ func (h *Handler) createVideoHandler(e *core.RequestEvent) error {
 		return apis.MapError(err)
 	}
 
-	if err := isValidThumbnailFile(thumbnailHeader); err != nil {
-		return apis.MapError(err)
-	}
-
 	videoFile, err := filesystem.NewFileFromMultipart(videoHeader)
 	if err != nil {
 		return apis.MapError(err)
 	}
 
-	thumbnailFile, err := filesystem.NewFileFromMultipart(thumbnailHeader)
-	if err != nil {
-		return apis.MapError(err)
+	var thumbnailFile *filesystem.File
+	if thumbnailHeader != nil {
+		if err := isValidThumbnailFile(thumbnailHeader); err != nil {
+			return apis.MapError(err)
+		}
+
+		thumbnailFile, err = filesystem.NewFileFromMultipart(thumbnailHeader)
+		if err != nil {
+			return apis.MapError(err)
+		}
 	}
 
 	response, err := h.service.createVideo(chapterId, userId, req, videoFile, thumbnailFile)
@@ -117,7 +117,34 @@ func (h *Handler) updateVideoHandler(e *core.RequestEvent) error {
 	userId := e.Auth.Id
 	videoId := e.Request.PathValue("videoId")
 
-	response, err := h.service.updateVideo(userId, videoId, req)
+	var videoFile *filesystem.File
+	var thumbnailFile *filesystem.File
+
+	_, videoHeader, err := e.Request.FormFile("video")
+	if err == nil {
+		if err := isValidVideoFile(videoHeader); err != nil {
+			return apis.MapError(err)
+		}
+
+		videoFile, err = filesystem.NewFileFromMultipart(videoHeader)
+		if err != nil {
+			return apis.MapError(err)
+		}
+	}
+
+	_, thumbnailHeader, err := e.Request.FormFile("thumbnail")
+	if err == nil {
+		if err := isValidThumbnailFile(thumbnailHeader); err != nil {
+			return apis.MapError(err)
+		}
+
+		thumbnailFile, err = filesystem.NewFileFromMultipart(thumbnailHeader)
+		if err != nil {
+			return apis.MapError(err)
+		}
+	}
+
+	response, err := h.service.updateVideo(userId, videoId, req, videoFile, thumbnailFile)
 	if err != nil {
 		return apis.MapError(err)
 	}

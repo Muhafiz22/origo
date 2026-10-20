@@ -4,6 +4,7 @@ import (
 	"backend/internal/apperr"
 	"database/sql"
 	"errors"
+	"fmt"
 	"mime/multipart"
 	"path/filepath"
 	"strings"
@@ -12,15 +13,27 @@ import (
 )
 
 func toVideoMetadataResponse(record *core.Record) VideoMetadataResponse {
-	response := VideoMetadataResponse{
-		Id:          record.Id,
-		ChapterId:   record.GetString("chapterId"),
-		Title:       record.GetString("title"),
-		Description: record.GetString("description"),
-		Duration:    record.GetInt("duration"),
-		Created:     record.GetString("created"),
+	thumbnail := record.GetString("thumbnail")
+
+	thumbnailURL := ""
+	if thumbnail != "" {
+		thumbnailURL = fmt.Sprintf(
+			"/api/files/%s/%s/%s?thumb=640x360",
+			record.Collection().Id,
+			record.Id,
+			thumbnail,
+		)
 	}
-	return response
+
+	return VideoMetadataResponse{
+		Id:           record.Id,
+		ChapterId:    record.GetString("chapterId"),
+		Title:        record.GetString("title"),
+		Description:  record.GetString("description"),
+		Duration:     record.GetInt("duration"),
+		Created:      record.GetString("created"),
+		ThumbnailUrl: thumbnailURL,
+	}
 }
 
 func isValidVideoFile(header *multipart.FileHeader) error {

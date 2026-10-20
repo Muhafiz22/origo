@@ -7,18 +7,19 @@ type CreateVideoRequest struct {
 }
 
 type UpdateVideoRequest struct {
-	Title       *string `json:"title"`
-	Description *string `json:"description"`
-	Duration    *int    `json:"duration"`
+	Title       *string `json:"title" form:"title"`
+	Description *string `json:"description" form:"description"`
+	Duration    *int    `json:"duration" form:"duration"`
 }
 
 type VideoMetadataResponse struct {
-	Id          string `json:"id"`
-	ChapterId   string `json:"chapterId"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Duration    int    `json:"duration"`
-	Created     string `json:"created"`
+	Id           string `json:"id"`
+	ChapterId    string `json:"chapterId"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	Duration     int    `json:"duration"`
+	Created      string `json:"created"`
+	ThumbnailUrl string `json:"thumbnailUrl"`
 }
 
 type VideoContentResponse struct {

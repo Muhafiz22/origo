@@ -67,7 +67,10 @@ func (s *Service) createVideo(chapterId string, userId string, req CreateVideoRe
 	record.Set("duration", req.Duration)
 	record.Set("chapterId", chapterId)
 	record.Set("video", videoFile)
-	record.Set("thumbnail", thumbnailFile)
+
+	if thumbnailFile != nil {
+		record.Set("thumbnail", thumbnailFile)
+	}
 
 	if err := s.app.Save(record); err != nil {
 		s.app.Logger().Error("failed to save video record", "error", err)
@@ -98,7 +101,7 @@ func (s *Service) getVideoForContent(videoId string) (*core.Record, error) {
 	return videoRecord, nil
 }
 
-func (s *Service) updateVideo(userId string, videoId string, req UpdateVideoRequest) (VideoMetadataResponse, error) {
+func (s *Service) updateVideo(userId string, videoId string, req UpdateVideoRequest, videoFile, thumbnailFile *filesystem.File) (VideoMetadataResponse, error) {
 	videoRecord, err := s.isValidVideo(videoId)
 	if err != nil {
 		return VideoMetadataResponse{}, err
@@ -123,11 +126,21 @@ func (s *Service) updateVideo(userId string, videoId string, req UpdateVideoRequ
 	if req.Title != nil {
 		videoRecord.Set("title", *req.Title)
 	}
+
 	if req.Description != nil {
 		videoRecord.Set("description", *req.Description)
 	}
+
 	if req.Duration != nil {
 		videoRecord.Set("duration", *req.Duration)
+	}
+
+	if videoFile != nil {
+		videoRecord.Set("video", videoFile)
+	}
+
+	if thumbnailFile != nil {
+		videoRecord.Set("thumbnail", thumbnailFile)
 	}
 
 	if err := s.app.Save(videoRecord); err != nil {
