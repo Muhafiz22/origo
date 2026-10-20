@@ -6,7 +6,9 @@ Origo is a course platform that brings structured, classroom-style learning onli
 
 ## Screenshot
 
-![Origo front page](docs/screenshot.png)
+![Origo front page](assets/home.png)
+![Origo Courses](assets/courses.png)
+![Origo video](assets/video.png)
 
 ## Features
 
