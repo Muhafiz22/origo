@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <title>Origo</title>
+  <defs>
+    <linearGradient id="disk" gradientUnits="userSpaceOnUse" x1="6" y1="0" x2="58" y2="0">
+      <stop offset="0" stop-color="#ff7a3d" />
+      <stop offset="0.5" stop-color="#ffd9a0" />
+      <stop offset="1" stop-color="#ff5a36" />
+    </linearGradient>
+    <radialGradient id="glow" cx="32" cy="32" r="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0.35" stop-color="#ff7a3d" stop-opacity="0.45" />
+      <stop offset="1" stop-color="#ff7a3d" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="64" height="64" rx="14" fill="#12100e" />
+  <circle cx="32" cy="32" r="30" fill="url(#glow)" />
+
+  <g transform="rotate(-18 32 32)">
+    <!-- accretion disk (back half gets hidden by the hole) -->
+    <ellipse cx="32" cy="32" rx="26" ry="7" fill="none" stroke="url(#disk)" stroke-width="3" />
+
+    <!-- lensed photon ring -->
+    <circle cx="32" cy="32" r="12.5" fill="none" stroke="#ffd9a0" stroke-width="2.2" />
+
+    <!-- event horizon -->
+    <circle cx="32" cy="32" r="11" fill="#000" />
+
+    <!-- front half of the disk, passing over the hole -->
+    <path d="M6 32A26 7 0 0 0 58 32" fill="none" stroke="url(#disk)" stroke-width="3.5" stroke-linecap="round" />
+  </g>
+</svg>
