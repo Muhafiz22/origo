@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getVideoContent } from "../services/videoServices";
 import { Link, useLocation } from "react-router";
+import { useToast } from "./ToastProvider";
 
 function videoErrorMessage(error) {
   switch (error?.status) {
@@ -27,6 +28,7 @@ function VideoPlayer({
   const [error, setError] = useState(null);
 
   const location = useLocation();
+  const toast = useToast();
 
   useEffect(() => {
     if (!video) {
@@ -51,6 +53,7 @@ function VideoPlayer({
         if (cancelled) return;
         setError(err);
         setVideoUrl(null);
+        toast.error(videoErrorMessage(err))
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -63,6 +66,11 @@ function VideoPlayer({
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [video]);
+
+  function handleSubscribe(){
+    toast.info("This feature hasn't been implemented yet. Stay tuned!");
+  }
+
   return (
     <div>
       {!video && (
@@ -91,6 +99,14 @@ function VideoPlayer({
             >
               Sign in
             </Link>
+          )}
+
+          {error.status === 403 && (
+            <button 
+              onClick={handleSubscribe}
+              className="btn btn-primary btn-sm">
+              Subscribe
+            </button>
           )}
         </div>
       )}

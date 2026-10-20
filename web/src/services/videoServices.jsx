@@ -1,10 +1,10 @@
 import apiClient from "./apiClient";
 import { API_BASE } from "./apiClient";
 
-export async function createVideo(chapterId, formData) {
+export async function createVideo(chapterId, data) {
   return apiClient(`/chapters/${chapterId}/videos`, {
     method: "POST",
-    body: formData,
+    body: data,
   });
 }
 
@@ -13,10 +13,12 @@ export async function getVideoMetaData(videoId) {
 }
 
 export async function updateVideo(videoId, data) {
-  return apiClient(`/videos/${videoId}`, {
+  const result = await apiClient(`/videos/${videoId}`, {
     method: "PATCH",
-    body: JSON.stringify(data),
+    body: data,
   });
+
+  return result;
 }
 
 export async function deleteVideo(videoId) {

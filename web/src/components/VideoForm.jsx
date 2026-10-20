@@ -74,7 +74,10 @@ function VideoForm({
   function handleThumbnailChange(event) {
     const selected = event.target.files[0];
 
-    if (!selected) return;
+    if (!selected) {
+      setThumbnail(null);
+      return;
+    }
 
     const validExts = [".jpg", ".jpeg", ".png", ".webp"];
     const validTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -117,11 +120,23 @@ function VideoForm({
   async function handleSubmit(event) {
     event.preventDefault();
 
-    let trimmedTitle = title.trim();
-    let trimmedDescription = description.trim();
+    const trimmedTitle = title.trim();
+    const trimmedDescription = description.trim();
 
     if (!trimmedTitle) {
       setError("Title cannot be empty");
+      return;
+    }
+
+  // Creating a video requires a new video file.
+    if (mode === "create" && (!file || !metaDataReady)) {
+      setError("Select a valid video and wait for its metadata to load");
+      return;
+    }
+
+  // If replacing a video, wait for its metadata.
+    if (mode === "edit" && file && !metaDataReady) {
+      setError("Wait for the video metadata to load");
       return;
     }
 
@@ -129,37 +144,36 @@ function VideoForm({
       setLoading(true);
       setError(null);
 
-      if (mode === "create") {
-        if (!file || !thumbnail || !metaDataReady) {
-          setError("Select a valid video and thumbnail first");
-          return;
-        }
+      const formData = new FormData();
 
-        const formData = new FormData();
+      formData.append("title", trimmedTitle);
+      formData.append("description", trimmedDescription);
+      formData.append("duration", String(duration));
 
-        formData.append("title", trimmedTitle);
-        formData.append("description", trimmedDescription);
-        formData.append("duration", String(duration));
+    // Include video only when a new file is selected.
+      if (file) {
         formData.append("video", file);
-        formData.append("thumbnail", thumbnail);
-
-        const newVideo = await createVideo(chapterId, formData);
-
-        onSuccess(newVideo);
-        return;
       }
 
-      const updatedVideo = await updateVideo(
-        initialData.videoId ?? initialData.id,
-        {
-          title: trimmedTitle,
-          description: trimmedDescription,
-        },
-      );
+    // Thumbnail is optional in both modes.
+      if (thumbnail) {
+        formData.append("thumbnail", thumbnail);
+      }
 
-      onSuccess(updatedVideo);
+      let result;
+
+      if (mode === "create") {
+        result = await createVideo(chapterId, formData);
+      } else {
+        result = await updateVideo(
+          initialData.videoId ?? initialData.id,
+          formData,
+        );
+      }
+
+      onSuccess?.(result);
     } catch (error) {
-      setError(error.message);
+      setError(error.message || "Failed to save video");
     } finally {
       setLoading(false);
     }
@@ -220,7 +234,7 @@ function VideoForm({
             htmlFor={`${id}-description`}
             className="mb-2 block text-sm font-medium"
           >
-            Description
+            Description <span className="text-xs text-base-content/50">(optional)</span>
           </label>
 
           <textarea
@@ -239,84 +253,60 @@ function VideoForm({
           </div>
         </div>
 
-        {mode === "create" && (
-          <div>
-            <label
-              htmlFor={`${id}-video`}
-              className="mb-2 block text-sm font-medium"
-            >
-              Video
-            </label>
+        <div>
+          <label
+            htmlFor={`${id}-video`}
+            className="mb-2 block text-sm font-medium"
+          >
+            Video
+          </label>
 
-            <input
-              id={`${id}-video`}
-              type="file"
-              accept="video/mp4"
-              onChange={handleFileChange}
-              disabled={loading}
-              required
-              className="file-input file-input-bordered w-full"
-            />
+          <input
+            id={`${id}-video`}
+            type="file"
+            accept="video/mp4,video/webm,video/ogg"
+            onChange={handleFileChange}
+            disabled={loading}
+            required={mode === "create"}
+            className="file-input file-input-bordered w-full"
+          />
 
-            <p className="mt-2 text-xs text-base-content/50">
-              MP4, WEBM or OGG video files only.
+          <p className="mt-2 text-xs text-base-content/50">
+            {mode === "edit"
+              ? "MP4, WEBM or OGG. Leave empty to keep the current video."
+              :  "MP4, WebM or OGG video."}
+          </p>
+
+          {metaDataReady && (
+            <p className="mt-2 font-mono text-xs text-base-content/60">
+              Duration: {duration} seconds
             </p>
+          )}
+        </div>
 
-            {metaDataReady && (
-              <p className="mt-2 font-mono text-xs text-base-content/60">
-                Duration: {duration} seconds
-              </p>
-            )}
-          </div>
-        )}
+        <div>
+          <label
+            htmlFor={`${id}-thumbnail`}
+            className="mb-2 block text-sm font-medium"
+          >
+            Thumbnail <span className="text-xs text-base-content/50">(optional)</span>
+          </label>
 
-        {mode === "create" && (
-          <div>
-            <label
-              htmlFor={`${id}-thumbnail`}
-              className="mb-2 block text-sm font-medium"
-            >
-              Thumbnail
-            </label>
+          <input
+            id={`${id}-thumbnail`}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleThumbnailChange}
+            disabled={loading}
+            className="file-input file-input-bordered w-full"
+          />
 
-            <input
-              id={`${id}-thumbnail`}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handleThumbnailChange}
-              disabled={loading}
-              required
-              className="file-input file-input-bordered w-full"
-            />
-
-            <p className="mt-2 text-xs text-base-content/50">
-              JPEG, PNG, or WebP image.
-            </p>
-          </div>
-        )}
-
-        {mode === "edit" && (
-          <div>
-            <label
-              htmlFor={`${id}-duration`}
-              className="mb-2 block text-sm font-medium"
-            >
-              Duration
-            </label>
-
-            <input
-              id={`${id}-duration`}
-              type="number"
-              value={duration}
-              className="input input-bordered w-full"
-              disabled
-            />
-
-            <p className="mt-2 text-xs text-base-content/50">
-              Duration cannot be changed while editing.
-            </p>
-          </div>
-        )}
+          <p className="mt-2 text-xs text-base-content/50">
+            {mode === "edit"
+              ? "JPEG, PNG, or WebP. Leave empty to keep the current thumbnail."
+              : "JPEG, PNG, or WebP image."}
+          </p>
+        </div>
 
         <video
           ref={videoRef}
@@ -341,7 +331,8 @@ function VideoForm({
             className="btn btn-primary min-w-24"
             disabled={
               loading ||
-              (mode === "create" && (!file || !thumbnail || !metaDataReady))
+              (mode === "create" && (!file || !metaDataReady)) ||
+              (mode === "edit" && file !== null && !metaDataReady)
             }
           >
             {loading ? (

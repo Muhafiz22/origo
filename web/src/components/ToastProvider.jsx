@@ -8,7 +8,7 @@ import {
 } from "react";
 
 const ToastContext = createContext(null);
-const MAX_TOASTS = 3;
+const MAX_TOASTS = 1;
 const DURATION_MS = 4000;
 const ALERT_CLASS = {
   success: "alert-success",

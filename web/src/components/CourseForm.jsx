@@ -201,7 +201,7 @@ export function CourseForm({
             htmlFor={`${id}-thumbnail`}
             className="mb-2 block text-sm font-medium"
           >
-            Thumbnail <span className="text-base-content/40">(optional)</span>
+            Thumbnail 
           </label>
 
           <input
