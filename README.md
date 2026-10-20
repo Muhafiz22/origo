@@ -39,7 +39,7 @@ Origo is a course platform that brings structured, classroom-style learning onli
 Clone the repository first:
 
 ```bash
-git clone https://github.com/<your-username>/origo.git
+git clone https://github.com/Muhafiz22/origo.git
 cd origo
 ```
 
