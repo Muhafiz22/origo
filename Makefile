@@ -1,6 +1,7 @@
 .PHONY: build run run-prod test deploy clean clean-db
 
 BINARY    := backend/bin/origo_server
+LOCAL_DATA_DIR := $(CURDIR)/backend/bin/pb_data
 FRONTEND  := $(CURDIR)/web/dist
 AUTH_MODE ?= password
 
@@ -13,12 +14,12 @@ build:
 # API only; the Vite dev server serves the frontend.
 # Email mode: make run AUTH_MODE=email
 run: build
-	@$(LOAD_ENV); AUTH_MODE=$(AUTH_MODE) ./$(BINARY) serve
+	@$(LOAD_ENV); AUTH_MODE=$(AUTH_MODE) DATA_DIR="$(LOCAL_DATA_DIR)" ./$(BINARY) serve
 
 # One Go process serves the built frontend and the API.
 run-prod: build
 	@test -f "$(FRONTEND)/index.html" || { echo "Run 'cd web && npm run build' first"; exit 1; }
-	@$(LOAD_ENV); AUTH_MODE=$(AUTH_MODE) FRONTEND_DIR="$(FRONTEND)" ./$(BINARY) serve
+	@$(LOAD_ENV); AUTH_MODE=$(AUTH_MODE) DATA_DIR="$(LOCAL_DATA_DIR)" FRONTEND_DIR="$(FRONTEND)" ./$(BINARY) serve
 
 test:
 	cd backend && go test ./...
